@@ -1,0 +1,22 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import GuardiaAuth from "../components/GuardiaAuth.astro";
+import PanelUsuario from "../components/PanelUsuario.astro";
+---
+
+<BaseLayout
+    title="Iria — Selección"
+    description="Iria — Selecciona una opción para continuar."
+>
+    <GuardiaAuth />
+    <main class="pagina-seleccion">
+        <PanelUsuario />
+    </main>
+</BaseLayout>
+
+<style>
+    .pagina-seleccion {
+        margin: 0;
+        padding: 0;
+    }
+</style>

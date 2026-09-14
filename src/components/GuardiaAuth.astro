@@ -1,0 +1,22 @@
+---
+// Guardia de autenticación reutilizable.
+// Úsalo al inicio de cualquier página protegida:
+//
+//   import GuardiaAuth from "../components/GuardiaAuth.astro";
+//   <BaseLayout ...>
+//       <GuardiaAuth />
+//       <main>...</main>
+//   </BaseLayout>
+---
+
+<script is:inline>
+    // Corre antes de pintar: sin sesión redirige a "/"
+    // sin mostrar ni un momento el contenido protegido.
+    try {
+        if (sessionStorage.getItem("iria_auth") !== "true") {
+            window.location.replace("/");
+        }
+    } catch {
+        window.location.replace("/");
+    }
+</script>

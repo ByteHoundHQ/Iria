@@ -1,0 +1,108 @@
+---
+---
+
+<div class="sel-min">
+    <div class="circulos" role="group" aria-label="Opciones de selección">
+        <button type="button" class="circulo circulo-1" data-btn="Btn1">
+            <span>Btn1</span>
+        </button>
+        <button type="button" class="circulo circulo-2" data-btn="Btn2">
+            <span>Btn2</span>
+        </button>
+        <button type="button" class="circulo circulo-3" data-btn="Btn3">
+            <span>Btn3</span>
+        </button>
+    </div>
+    <button type="button" id="boton-regresar" class="btn-regresar">
+        Regresar
+    </button>
+</div>
+
+<script>
+    const botones = document.querySelectorAll<HTMLButtonElement>("[data-btn]");
+
+    botones.forEach((boton) => {
+        boton.addEventListener("click", () => {
+            botones.forEach((otro) => otro.classList.remove("activo"));
+            boton.classList.add("activo");
+
+            const nombre = boton.getAttribute("data-btn") ?? "opción";
+            window.dispatchEvent(
+                new CustomEvent("iria:seleccion", { detail: nombre }),
+            );
+        });
+    });
+</script>
+
+<style>
+    .sel-min {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 2rem;
+        background: #f1f5f9;
+        padding: 2rem;
+        box-sizing: border-box;
+    }
+    .circulos {
+        position: relative;
+        width: 660px;
+        height: 590px;
+    }
+    .circulo {
+        position: absolute;
+        width: 350px;
+        height: 350px;
+        border: 1px solid #cbd5e1;
+        border-radius: 50%;
+        background: #fff;
+        color: #0f172a;
+        font-size: 1.25rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: grid;
+        place-items: center;
+    }
+    .circulo:hover {
+        background: #f8fafc;
+    }
+    .circulo.activo {
+        background: #0f172a;
+        border-color: #0f172a;
+        color: #fff;
+    }
+    .circulo-1 {
+        left: 0;
+        top: 0;
+    }
+    .circulo-2 {
+        left: 310px;
+        top: 0;
+    }
+    .circulo-3 {
+        left: 155px;
+        top: 240px;
+    }
+    .btn-regresar {
+        border: none;
+        border-radius: 6px;
+        background: #0f172a;
+        color: #fff;
+        padding: 0.6rem 2rem;
+        cursor: pointer;
+    }
+    .btn-regresar:hover {
+        background: #1e293b;
+    }
+    @media (max-width: 768px) {
+        .sel-min {
+            overflow-x: clip;
+        }
+        .circulos {
+            transform: scale(0.5);
+            transform-origin: center;
+        }
+    }
+</style>

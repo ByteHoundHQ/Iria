@@ -1,0 +1,26 @@
+---
+import SelectorCirculos from "./SelectorCirculos.astro";
+---
+
+<section data-vista-panel hidden>
+    <SelectorCirculos />
+</section>
+
+<script>
+    import { cerrarSesion, estaAutenticado } from "../lib/auth.ts";
+
+    // El panel nace oculto (hidden) y solo se revela con sesión válida.
+    // Así /seleccion nunca parpadea contenido protegido.
+    if (!estaAutenticado()) {
+        window.location.replace("/");
+    } else {
+        document
+            .querySelector("[data-vista-panel]")
+            ?.removeAttribute("hidden");
+    }
+
+    document.getElementById("boton-regresar")?.addEventListener("click", () => {
+        cerrarSesion();
+        window.location.href = "/";
+    });
+</script>

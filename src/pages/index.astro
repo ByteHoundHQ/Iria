@@ -1,19 +1,20 @@
 ---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import AuthApp from "../components/AuthApp.astro";
 ---
 
-<html lang="es-MX">
-    <head>
-        <meta charset="utf-8" />
-        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-        <link rel="icon" href="/favicon.ico" />
-        <meta name="viewport" content="width=device-width" />
-        <meta name="generator" content={Astro.generator} />
-        <meta name="description" content="Iria — Bienvenido a nuestro sitio en español (México)." />
-        <meta property="og:locale" content="es_MX" />
-        <title>Iria</title>
-    </head>
-    <body>
-        <h1>Iria</h1>
-        <p>Bienvenido a Iria.</p>
-    </body>
-</html>
+<BaseLayout
+    title="Iria — Iniciar sesión"
+    description="Iria — Inicia sesión para continuar."
+>
+    <main class="pagina-login">
+        <AuthApp />
+    </main>
+</BaseLayout>
+
+<style>
+    .pagina-login {
+        margin: 0;
+        padding: 0;
+    }
+</style>

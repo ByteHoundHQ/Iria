@@ -1,0 +1,44 @@
+---
+interface Props {
+    title?: string;
+    description?: string;
+}
+
+const {
+    title = "Iria",
+    description = "Iria — Bienvenido a nuestro sitio en español (México).",
+} = Astro.props;
+---
+
+<html lang="es-MX">
+    <head>
+        <meta charset="utf-8" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="icon" href="/favicon.ico" />
+        <meta name="viewport" content="width=device-width" />
+        <meta name="generator" content={Astro.generator} />
+        <meta name="description" content={description} />
+        <meta property="og:locale" content="es_MX" />
+        <title>{title}</title>
+    </head>
+    <body>
+        <slot />
+    </body>
+</html>
+
+<style is:global>
+    body {
+        margin: 0;
+        font-family:
+            system-ui,
+            -apple-system,
+            "Segoe UI",
+            Roboto,
+            sans-serif;
+        color: #374151;
+        background: #f9fafb;
+    }
+    [hidden] {
+        display: none !important;
+    }
+</style>
