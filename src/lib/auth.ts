@@ -17,18 +17,27 @@ export function obtenerCorreo(): string | null {
     return sessionStorage.getItem(USER_KEY);
 }
 
+function leerCredenciales(): { email?: string; password?: string } {
+    return {
+        email:
+            import.meta.env.PUBLIC_AUTH_EMAIL ??
+            import.meta.env.PUBLIC_AUTH_EMAIL_PROD,
+        password:
+            import.meta.env.PUBLIC_AUTH_PASSWORD ??
+            import.meta.env.PUBLIC_AUTH_PASSWORD_PROD,
+    };
+}
+
 export function credencialesConfiguradas(): boolean {
-    return Boolean(
-        import.meta.env.PUBLIC_AUTH_EMAIL &&
-            import.meta.env.PUBLIC_AUTH_PASSWORD,
-    );
+    const { email, password } = leerCredenciales();
+    return Boolean(email && password);
 }
 
 export function iniciarSesion(correo: string, contrasena: string): boolean {
     if (!enNavegador()) return false;
 
-    const AUTH_EMAIL = import.meta.env.PUBLIC_AUTH_EMAIL;
-    const AUTH_PASSWORD = import.meta.env.PUBLIC_AUTH_PASSWORD;
+    const { email: AUTH_EMAIL, password: AUTH_PASSWORD } =
+        leerCredenciales();
 
     const correoLimpio = correo.trim();
 
