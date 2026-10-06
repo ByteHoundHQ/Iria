@@ -4,13 +4,13 @@
 <div class="sel-min">
     <div class="circulos" role="group" aria-label="Opciones de selección">
         <button type="button" class="circulo circulo-1" data-btn="Btn1">
-            <span>Btn1</span>
+            <span>Communicate</span>
         </button>
         <button type="button" class="circulo circulo-2" data-btn="Btn2">
-            <span>Btn2</span>
+            <span>Connect</span>
         </button>
         <button type="button" class="circulo circulo-3" data-btn="Btn3">
-            <span>Btn3</span>
+            <span>Create</span>
         </button>
     </div>
     <button type="button" id="boton-regresar" class="btn-regresar">
@@ -19,6 +19,12 @@
 </div>
 
 <script>
+    const rutas: Record<string, string> = {
+        Btn1: "/ind_1",
+        Btn2: "/ind_2",
+        Btn3: "/ind_3",
+    };
+
     const botones = document.querySelectorAll<HTMLButtonElement>("[data-btn]");
 
     botones.forEach((boton) => {
@@ -30,6 +36,11 @@
             window.dispatchEvent(
                 new CustomEvent("iria:seleccion", { detail: nombre }),
             );
+
+            const destino = rutas[nombre];
+            if (destino) {
+                window.location.href = destino;
+            }
         });
     });
 </script>

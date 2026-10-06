@@ -1,0 +1,199 @@
+---
+interface Opcion {
+    id: string;
+    etiqueta: string;
+    href?: string;
+}
+
+interface Props {
+    titulo?: string;
+    etiquetaBoton?: string;
+    opciones?: Opcion[];
+}
+
+const {
+    titulo = "Text",
+    etiquetaBoton = "Button Communicate",
+    opciones = [
+        { id: "tareas", etiqueta: "Tareas" },
+        { id: "calendario", etiqueta: "Calendario mensual" },
+        { id: "aprobaciones", etiqueta: "Aprobaciones" },
+    ],
+} = Astro.props;
+---
+
+<section class="ind">
+    <header class="ind-top">
+        <h1>{titulo}</h1>
+    </header>
+
+    <div class="ind-body">
+        <div class="ind-left">
+            <button type="button" class="ind-circle" id="boton-comunicar">
+                <span>{etiquetaBoton}</span>
+            </button>
+        </div>
+
+        <nav class="ind-right" aria-label="Secciones">
+            <ul>
+                {
+                    opciones.map((op) => (
+                        <li>
+                            <button
+                                type="button"
+                                class="opcion"
+                                data-seccion={op.id}
+                                data-href={op.href}
+                            >
+                                {op.etiqueta}
+                            </button>
+                        </li>
+                    ))
+                }
+            </ul>
+        </nav>
+    </div>
+
+    <footer class="ind-foot">
+        <button type="button" id="boton-volver" class="btn-regresar">
+            Regresar
+        </button>
+    </footer>
+</section>
+
+<script>
+    document.getElementById("boton-volver")?.addEventListener("click", () => {
+        window.location.href = "/seleccion";
+    });
+
+    document.getElementById("boton-comunicar")?.addEventListener("click", () => {
+        window.dispatchEvent(new CustomEvent("iria:comunicar"));
+    });
+
+    document.querySelectorAll("[data-seccion]").forEach((el) => {
+        el.addEventListener("click", () => {
+            const target = el as HTMLElement;
+            const seccion = target.dataset.seccion ?? "";
+            window.dispatchEvent(
+                new CustomEvent("iria:seccion", { detail: seccion }),
+            );
+
+            const href = target.dataset.href;
+            if (href) {
+                window.location.href = href;
+            }
+        });
+    });
+</script>
+
+<style>
+    .ind {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        background: #f1f5f9;
+        box-sizing: border-box;
+    }
+    .ind-top {
+        background: #fff;
+        border-bottom: 1px solid #e2e8f0;
+        padding: 2rem 1rem;
+        text-align: center;
+    }
+    .ind-top h1 {
+        margin: 0;
+        font-size: 1.75rem;
+        font-weight: 800;
+        letter-spacing: 0.05em;
+        color: #0f172a;
+    }
+    .ind-body {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4rem;
+        padding: 2rem;
+        box-sizing: border-box;
+    }
+    .ind-left {
+        flex: 0 0 auto;
+    }
+    .ind-circle {
+        width: 300px;
+        height: 300px;
+        border-radius: 50%;
+        border: 1px solid #cbd5e1;
+        background: #fff;
+        color: #0f172a;
+        font-size: 1.25rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: grid;
+        place-items: center;
+        padding: 2rem;
+    }
+    .ind-circle:hover {
+        background: #f8fafc;
+    }
+    .ind-right ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        width: 100%;
+        max-width: 320px;
+    }
+    .opcion {
+        width: 100%;
+        text-align: left;
+        padding: 0.8rem 1rem;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        background: #fff;
+        color: #0f172a;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+    }
+    .opcion:hover {
+        background: #f8fafc;
+        border-color: #0f172a;
+    }
+    .ind-foot {
+        display: flex;
+        justify-content: flex-end;
+        padding: 1.5rem 2rem 2rem;
+    }
+    .btn-regresar {
+        border: none;
+        border-radius: 6px;
+        background: #0f172a;
+        color: #fff;
+        padding: 0.6rem 2rem;
+        font-size: 1rem;
+        cursor: pointer;
+    }
+    .btn-regresar:hover {
+        background: #1e293b;
+    }
+    @media (max-width: 820px) {
+        .ind-body {
+            flex-direction: column;
+            gap: 2rem;
+        }
+        .ind-circle {
+            width: 230px;
+            height: 230px;
+            font-size: 1.15rem;
+        }
+        .ind-right ul {
+            max-width: 100%;
+        }
+        .ind-foot {
+            justify-content: center;
+        }
+    }
+</style>

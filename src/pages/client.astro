@@ -1,0 +1,293 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import GuardiaAuth from "../components/GuardiaAuth.astro";
+
+const clientes = [
+    { nombre: "Mariana López", empresa: "Café Roma Norte", email: "mariana@caferoma.mx", tel: "+52 55 1234 8801", plan: "Pro", estado: "Activo", proyectos: 6, iniciales: "ML" },
+    { nombre: "Jorge Hernández", empresa: "Taller Hernández", email: "jorge@tallerhz.mx", tel: "+52 55 9872 4410", plan: "Base", estado: "Activo", proyectos: 2, iniciales: "JH" },
+    { nombre: "Ana Paula Ruiz", empresa: "Librería Gandi Sur", email: "ana@gandisur.mx", tel: "+52 55 3321 0098", plan: "Pro", estado: "Pendiente", proyectos: 4, iniciales: "AR" },
+    { nombre: "Carlos Méndez", empresa: "Clínica Santa Fe", email: "carlos@clinicasf.mx", tel: "+52 55 4455 6677", plan: "Empresarial", estado: "Activo", proyectos: 9, iniciales: "CM" },
+    { nombre: "Lucía Fernández", empresa: "Hotel Catedral", email: "lucia@hotelcatedral.mx", tel: "+52 55 7788 1122", plan: "Base", estado: "Inactivo", proyectos: 1, iniciales: "LF" },
+    { nombre: "Diego Ramírez", empresa: "Distribuidora Andalucía", email: "diego@distandalucia.mx", tel: "+52 55 2233 4455", plan: "Pro", estado: "Activo", proyectos: 5, iniciales: "DR" },
+    { nombre: "Sofía Torres", empresa: "Estudio Nórdica", email: "sofia@nordica.mx", tel: "+52 55 6677 8899", plan: "Empresarial", estado: "Activo", proyectos: 11, iniciales: "ST" },
+    { nombre: "Pedro Aguilar", empresa: "Panadería La Espiga", email: "pedro@laespiga.mx", tel: "+52 55 1100 2233", plan: "Base", estado: "Pendiente", proyectos: 3, iniciales: "PA" },
+];
+---
+
+<BaseLayout title="Iria — Clientes" description="Iria — Parrilla de clientes.">
+    <GuardiaAuth />
+    <main class="cli">
+        <header class="cli-top">
+            <div>
+                <h1>Clientes</h1>
+                <p>Parrilla de clientes del usuario · datos de ejemplo</p>
+            </div>
+            <button type="button" id="boton-volver" class="btn-regresar">
+                Regresar
+            </button>
+        </header>
+
+        <div class="cli-tools">
+            <input
+                id="buscador"
+                type="search"
+                placeholder="Buscar por nombre o empresa…"
+                autocomplete="off"
+            />
+            <span id="contador" class="contador"></span>
+        </div>
+
+        <section class="parrilla" aria-label="Lista de clientes">
+            {
+                clientes.map((c) => (
+                    <article
+                        class="tarjeta"
+                        data-busqueda={`${c.nombre} ${c.empresa}`.toLowerCase()}
+                    >
+                        <div class="tarjeta-head">
+                            <span class="avatar" aria-hidden="true">
+                                {c.iniciales}
+                            </span>
+                            <div>
+                                <strong>{c.nombre}</strong>
+                                <span class="empresa">{c.empresa}</span>
+                            </div>
+                            <span
+                                class:list={[
+                                    "pill",
+                                    c.estado === "Activo" && "ok",
+                                    c.estado === "Pendiente" && "warn",
+                                    c.estado === "Inactivo" && "off",
+                                ]}
+                            >
+                                {c.estado}
+                            </span>
+                        </div>
+                        <dl class="datos">
+                            <div>
+                                <dt>Plan</dt>
+                                <dd>{c.plan}</dd>
+                            </div>
+                            <div>
+                                <dt>Proyectos</dt>
+                                <dd>{c.proyectos}</dd>
+                            </div>
+                        </dl>
+                        <p class="contacto">{c.email}</p>
+                        <p class="contacto muted">{c.tel}</p>
+                    </article>
+                ))
+            }
+        </section>
+        <p id="sin-resultados" class="sin-resultados" hidden>
+            Sin resultados para esa búsqueda.
+        </p>
+    </main>
+</BaseLayout>
+
+<script>
+    document.getElementById("boton-volver")?.addEventListener("click", () => {
+        window.location.href = "/ind_2";
+    });
+
+    const buscador = document.getElementById(
+        "buscador",
+    ) as HTMLInputElement | null;
+    const tarjetas = Array.from(
+        document.querySelectorAll<HTMLElement>(".tarjeta"),
+    );
+    const contador = document.getElementById("contador");
+    const vacio = document.getElementById("sin-resultados");
+
+    function actualizar() {
+        const q = (buscador?.value ?? "").trim().toLowerCase();
+        let visibles = 0;
+        tarjetas.forEach((t) => {
+            const texto = t.dataset.busqueda ?? "";
+            const ok = !q || texto.includes(q);
+            t.style.display = ok ? "" : "none";
+            if (ok) visibles++;
+        });
+        if (contador) contador.textContent = `${visibles} clientes`;
+        vacio?.toggleAttribute("hidden", visibles !== 0);
+    }
+
+    buscador?.addEventListener("input", actualizar);
+    actualizar();
+</script>
+
+<style>
+    .cli {
+        min-height: 100vh;
+        background: #f1f5f9;
+        padding: 1.5rem;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+        width: 100%;
+        margin: 0;
+    }
+    .cli-top {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+    }
+    .cli-top h1 {
+        margin: 0;
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: #0f172a;
+    }
+    .cli-top p {
+        margin: 0.25rem 0 0;
+        color: #64748b;
+    }
+    .btn-regresar {
+        border: none;
+        border-radius: 6px;
+        background: #0f172a;
+        color: #fff;
+        padding: 0.6rem 2rem;
+        font-size: 1rem;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+    .btn-regresar:hover {
+        background: #1e293b;
+    }
+    .cli-tools {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    .cli-tools input {
+        flex: 1;
+        padding: 0.8rem 1rem;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        background: #fff;
+        font-size: 1rem;
+        color: #0f172a;
+    }
+    .contador {
+        font-size: 0.9rem;
+        color: #64748b;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+    .parrilla {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 1rem;
+    }
+    .tarjeta {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 1.2rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.8rem;
+    }
+    .tarjeta:hover {
+        border-color: #0f172a;
+    }
+    .tarjeta-head {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+    }
+    .tarjeta-head > div {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    .tarjeta-head strong {
+        color: #0f172a;
+        font-size: 1rem;
+    }
+    .empresa {
+        color: #64748b;
+        font-size: 0.85rem;
+    }
+    .avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background: #0f172a;
+        color: #fff;
+        display: grid;
+        place-items: center;
+        font-weight: 800;
+        font-size: 0.95rem;
+        flex: 0 0 auto;
+    }
+    .pill {
+        display: inline-block;
+        padding: 0.15rem 0.7rem;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+    .pill.ok {
+        background: #dcfce7;
+        color: #166534;
+    }
+    .pill.warn {
+        background: #fef9c3;
+        color: #854d0e;
+    }
+    .pill.off {
+        background: #f1f5f9;
+        color: #64748b;
+    }
+    .datos {
+        display: flex;
+        gap: 1.5rem;
+        margin: 0;
+    }
+    .datos dt {
+        font-size: 0.8rem;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    .datos dd {
+        margin: 0.15rem 0 0;
+        font-weight: 700;
+        color: #0f172a;
+    }
+    .contacto {
+        margin: 0;
+        font-size: 0.9rem;
+        color: #0f172a;
+        overflow-wrap: anywhere;
+    }
+    .contacto.muted {
+        color: #64748b;
+    }
+    .sin-resultados {
+        text-align: center;
+        color: #64748b;
+    }
+    @media (max-width: 640px) {
+        .cli {
+            padding: 1rem;
+        }
+        .cli-top {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .cli-tools {
+            flex-direction: column;
+            align-items: stretch;
+        }
+    }
+</style>

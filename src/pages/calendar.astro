@@ -1,0 +1,426 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import GuardiaAuth from "../components/GuardiaAuth.astro";
+---
+
+<BaseLayout title="Iria — Calendario" description="Iria — Calendario de pendientes.">
+    <GuardiaAuth />
+    <main class="cal">
+        <header class="cal-top">
+            <div>
+                <h1>Calendario mensual</h1>
+                <p>Cada tarjeta de color es un pendiente. Toca un día para ver el detalle.</p>
+            </div>
+            <div class="cal-acciones">
+                <button type="button" id="btn-nota" class="btn-primary">
+                    + Crear nota
+                </button>
+                <button type="button" id="boton-volver" class="btn-regresar">
+                    Regresar
+                </button>
+            </div>
+        </header>
+
+        <section class="ejemplo">
+            <strong>¿Cómo leerlo?</strong>
+            <span class="chip c-parrilla">Parrilla · Ej: Parrilla Café Roma</span>
+            <span class="chip c-subir">Por subir · Ej: Subir reels</span>
+            <span class="chip c-imagen">Imagen · Ej: Crear 4 fotos</span>
+            <span class="chip c-nota">Nota · Ej: Llamar al cliente</span>
+        </section>
+
+        <article class="card cal-grande">
+            <div class="cal-nav">
+                <button type="button" id="btn-prev" aria-label="Mes anterior">‹</button>
+                <h2 id="cal-titulo">Mes</h2>
+                <button type="button" id="btn-next" aria-label="Mes siguiente">›</button>
+                <button type="button" id="btn-hoy" class="btn-hoy">Hoy</button>
+            </div>
+            <div class="semana" aria-hidden="true">
+                <span>Lunes</span><span>Martes</span><span>Miércoles</span><span>Jueves</span><span>Viernes</span><span>Sábado</span><span>Domingo</span>
+            </div>
+            <div id="rejilla" class="rejilla"></div>
+        </article>
+
+        <section class="abajo">
+            <article class="card">
+                <h2>Pendientes del día</h2>
+                <p class="muted" id="dia-fecha"></p>
+                <ul id="lista-dia" class="lista"></ul>
+            </article>
+            <article class="card">
+                <h2>Esta semana · ejemplo</h2>
+                <p class="muted">Lo que vería el usuario final</p>
+                <ul class="lista resumen">
+                    <li class="res parrilla"><strong>Lun 6</strong><span>Parrilla Café Roma + subir copies</span></li>
+                    <li class="res subir"><strong>Mar 7</strong><span>Subir 2 reels Hotel Catedral</span></li>
+                    <li class="res imagen"><strong>Mié 8</strong><span>Crear fotos Librería Sur</span></li>
+                    <li class="res nota"><strong>Vie 10</strong><span>Nota: confirmar horario con cliente</span></li>
+                </ul>
+            </article>
+        </section>
+
+        <div id="modal" class="modal" hidden>
+            <div class="modal-caja" role="dialog" aria-modal="true" aria-labelledby="modal-titulo">
+                <h2 id="modal-titulo">Nueva nota</h2>
+                <form id="form-nota">
+                    <label>
+                        Fecha
+                        <input id="f-fecha" type="date" required />
+                    </label>
+                    <label>
+                        Tipo
+                        <select id="f-tipo">
+                            <option value="parrilla">Pendiente de parrilla</option>
+                            <option value="subir">Por subir</option>
+                            <option value="imagen">Creación de imagen</option>
+                            <option value="nota" selected>Nota</option>
+                        </select>
+                    </label>
+                    <label>
+                        Título
+                        <input id="f-titulo" type="text" placeholder="Ej. Revisar copy Café Roma" required maxlength="80" />
+                    </label>
+                    <label>
+                        Detalle
+                        <textarea id="f-detalle" rows="3" placeholder="Opcional"></textarea>
+                    </label>
+                    <div class="modal-acciones">
+                        <button type="button" id="btn-cancelar" class="btn-ghost">Cancelar</button>
+                        <button type="submit" class="btn-primary">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+</BaseLayout>
+
+<script>
+    const KEY = "iria_calendar_notas";
+
+    const semillas = [
+        { fecha: "2026-10-05", tipo: "parrilla", titulo: "Parrilla Café Roma" },
+        { fecha: "2026-10-05", tipo: "subir", titulo: "Subir menú semanal" },
+        { fecha: "2026-10-06", tipo: "parrilla", titulo: "Revisar copies Roma" },
+        { fecha: "2026-10-06", tipo: "imagen", titulo: "Crear promo 2x1" },
+        { fecha: "2026-10-07", tipo: "subir", titulo: "Subir 2 reels Catedral" },
+        { fecha: "2026-10-08", tipo: "imagen", titulo: "4 fotos Librería Sur" },
+        { fecha: "2026-10-08", tipo: "nota", titulo: "Llamar a proveedor" },
+        { fecha: "2026-10-10", tipo: "nota", titulo: "Confirmar horario cliente" },
+        { fecha: "2026-10-12", tipo: "parrilla", titulo: "Aprobar Taller Hernández" },
+        { fecha: "2026-10-13", tipo: "subir", titulo: "Subir carrusel Santa Fe" },
+        { fecha: "2026-10-13", tipo: "imagen", titulo: "Portada reporte" },
+        { fecha: "2026-10-13", tipo: "nota", titulo: "Pedir factura" },
+        { fecha: "2026-10-16", tipo: "imagen", titulo: "Sesión La Espiga" },
+        { fecha: "2026-10-20", tipo: "parrilla", titulo: "Parrilla Andalucía" },
+        { fecha: "2026-10-20", tipo: "subir", titulo: "Subir stories Nórdica" },
+        { fecha: "2026-10-23", tipo: "subir", titulo: "Subir video corporativo" },
+        { fecha: "2026-10-27", tipo: "imagen", titulo: "Crear 6 banners" },
+        { fecha: "2026-10-29", tipo: "parrilla", titulo: "Cierre de mes" },
+    ];
+
+    const MESES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+    const TIPOS = { parrilla: "Parrilla", subir: "Por subir", imagen: "Imagen", nota: "Nota" };
+
+    const hoy = new Date();
+    const estado = { y: hoy.getFullYear(), m: hoy.getMonth(), sel: aFecha(hoy) };
+
+    const rejilla = document.getElementById("rejilla");
+    const titulo = document.getElementById("cal-titulo");
+    const listaDia = document.getElementById("lista-dia");
+    const diaFecha = document.getElementById("dia-fecha");
+    const modal = document.getElementById("modal");
+    const form = document.getElementById("form-nota") as HTMLFormElement | null;
+    const fFecha = document.getElementById("f-fecha") as HTMLInputElement | null;
+
+    function aFecha(d) { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; }
+    function leerNotas() {
+        try { return JSON.parse(localStorage.getItem(KEY) ?? "[]"); }
+        catch { return []; }
+    }
+    function guardarNotas(n) { localStorage.setItem(KEY, JSON.stringify(n)); }
+    function todos() { return [...semillas, ...leerNotas()]; }
+    function eventosDel(fecha) { return todos().filter((e) => e.fecha === fecha); }
+
+    function pintar() {
+        if (!rejilla || !titulo) return;
+        titulo.textContent = `${MESES[estado.m]} ${estado.y}`;
+        rejilla.innerHTML = "";
+        const primero = new Date(estado.y, estado.m, 1);
+        let desfase = (primero.getDay() + 6) % 7;
+        const dias = new Date(estado.y, estado.m + 1, 0).getDate();
+        for (let i = 0; i < desfase; i++) {
+            const v = document.createElement("span");
+            v.className = "vacio";
+            rejilla.appendChild(v);
+        }
+        for (let d = 1; d <= dias; d++) {
+            const fecha = `${estado.y}-${String(estado.m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+            const evs = eventosDel(fecha);
+            const b = document.createElement("button");
+            b.type = "button";
+            b.className = "dia";
+            if (fecha === estado.sel) b.classList.add("sel");
+            if (fecha === aFecha(hoy)) b.classList.add("hoy");
+
+            const num = document.createElement("span");
+            num.className = "num";
+            num.textContent = String(d);
+            b.appendChild(num);
+
+            const cont = document.createElement("span");
+            cont.className = "chips";
+            evs.slice(0, 3).forEach((e) => {
+                const c = document.createElement("span");
+                c.className = `mini m-${e.tipo}`;
+                c.textContent = e.titulo;
+                cont.appendChild(c);
+            });
+            if (evs.length > 3) {
+                const mas = document.createElement("span");
+                mas.className = "mas";
+                mas.textContent = `+${evs.length - 3} más`;
+                cont.appendChild(mas);
+            }
+            if (!evs.length) {
+                const libre = document.createElement("span");
+                libre.className = "libre";
+                libre.textContent = "Libre";
+                cont.appendChild(libre);
+            }
+            b.appendChild(cont);
+            b.addEventListener("click", () => { estado.sel = fecha; pintar(); pintarDia(); });
+            rejilla.appendChild(b);
+        }
+    }
+
+    function pintarDia() {
+        if (!listaDia) return;
+        const evs = eventosDel(estado.sel);
+        const [y, m, d] = estado.sel.split("-").map(Number);
+        if (diaFecha) diaFecha.textContent = `${d} de ${MESES[m-1]} de ${y} · ${evs.length} pendiente(s)`;
+        listaDia.innerHTML = "";
+        if (!evs.length) {
+            const li = document.createElement("li");
+            li.className = "vacio-msg";
+            li.textContent = "Día libre. Usa «+ Crear nota» para agregar un pendiente aquí.";
+            listaDia.appendChild(li);
+            return;
+        }
+        const notas = leerNotas();
+        evs.forEach((e) => {
+            const li = document.createElement("li");
+            li.className = `item b-${e.tipo}`;
+            const esNota = "id" in e;
+            li.innerHTML = `<span class="pill p-${e.tipo}">${TIPOS[e.tipo] ?? e.tipo}</span><strong></strong>${e.detalle ? "<span class='det'></span>" : ""}`;
+            li.querySelector("strong")!.textContent = e.titulo;
+            if (e.detalle) li.querySelector(".det")!.textContent = e.detalle;
+            if (esNota) {
+                const del = document.createElement("button");
+                del.type = "button";
+                del.className = "btn-del";
+                del.textContent = "Eliminar";
+                del.addEventListener("click", () => {
+                    guardarNotas(notas.filter((n) => n.id !== e.id));
+                    pintar(); pintarDia();
+                });
+                li.appendChild(del);
+            }
+            listaDia.appendChild(li);
+        });
+    }
+
+    function abrirModal() {
+        modal?.removeAttribute("hidden");
+        if (fFecha) fFecha.value = estado.sel;
+        (document.getElementById("f-titulo") as HTMLInputElement | null)?.focus();
+    }
+    function cerrarModal() { modal?.setAttribute("hidden", ""); }
+
+    document.getElementById("boton-volver")?.addEventListener("click", () => { window.location.href = "/ind_1"; });
+    document.getElementById("btn-prev")?.addEventListener("click", () => {
+        estado.m--; if (estado.m < 0) { estado.m = 11; estado.y--; } pintar();
+    });
+    document.getElementById("btn-next")?.addEventListener("click", () => {
+        estado.m++; if (estado.m > 11) { estado.m = 0; estado.y++; } pintar();
+    });
+    document.getElementById("btn-hoy")?.addEventListener("click", () => {
+        estado.y = hoy.getFullYear(); estado.m = hoy.getMonth(); estado.sel = aFecha(hoy); pintar(); pintarDia();
+    });
+    document.getElementById("btn-nota")?.addEventListener("click", abrirModal);
+    document.getElementById("btn-cancelar")?.addEventListener("click", cerrarModal);
+    modal?.addEventListener("click", (e) => { if (e.target === modal) cerrarModal(); });
+
+    form?.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const fecha = (document.getElementById("f-fecha") as HTMLInputElement).value;
+        const tipo = (document.getElementById("f-tipo") as HTMLSelectElement).value;
+        const tituloN = (document.getElementById("f-titulo") as HTMLInputElement).value.trim();
+        const detalle = (document.getElementById("f-detalle") as HTMLTextAreaElement).value.trim();
+        if (!fecha || !tituloN) return;
+        const notas = leerNotas();
+        notas.push({ id: `n${Date.now()}`, fecha, tipo, titulo: tituloN, detalle });
+        guardarNotas(notas);
+        const [y, m] = fecha.split("-").map(Number);
+        estado.y = y; estado.m = m - 1; estado.sel = fecha;
+        form.reset();
+        cerrarModal(); pintar(); pintarDia();
+    });
+
+    pintar(); pintarDia();
+</script>
+
+<style is:global>
+    .cal {
+        min-height: 100vh;
+        background: #f1f5f9;
+        padding: 1.5rem;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        gap: 1.2rem;
+        width: 100%;
+        margin: 0;
+    }
+    .cal button {
+        font-family: inherit;
+    }
+    .cal-top {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+    }
+    .cal-top h1 { margin: 0; font-size: 2rem; font-weight: 800; color: #0f172a; }
+    .cal-top p { margin: 0.25rem 0 0; color: #64748b; font-size: 1rem; }
+    .cal-acciones { display: flex; gap: 0.6rem; }
+    .btn-primary {
+        border: none; border-radius: 6px; background: #0f172a; color: #fff;
+        padding: 0.75rem 1.5rem; font-size: 1rem; font-weight: 700; cursor: pointer; white-space: nowrap;
+    }
+    .btn-primary:hover { background: #1e293b; }
+    .btn-regresar {
+        border: 1px solid #cbd5e1; border-radius: 6px; background: #fff; color: #0f172a;
+        padding: 0.75rem 1.5rem; font-size: 1rem; font-weight: 600; cursor: pointer; white-space: nowrap;
+    }
+    .ejemplo {
+        background: #fff; border: 1px solid #e2e8f0; border-radius: 8px;
+        padding: 1rem 1.2rem; display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem;
+        color: #0f172a;
+    }
+    .chip {
+        font-size: 0.9rem; font-weight: 600; padding: 0.45rem 0.8rem; border-radius: 999px;
+        border: 1px solid transparent; white-space: nowrap;
+    }
+    .c-parrilla { background: #e2e8f0; color: #0f172a; }
+    .c-subir { background: #dbeafe; color: #1d4ed8; }
+    .c-imagen { background: #f3e8ff; color: #7e22ce; }
+    .c-nota { background: #dcfce7; color: #166534; }
+    .cal-grande { padding: 1.8rem; }
+    .card {
+        background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.5rem;
+    }
+    .card h2 { margin: 0; font-size: 1.4rem; color: #0f172a; }
+    .muted { margin: 0.25rem 0 1rem; color: #64748b; font-size: 0.95rem; }
+    .cal-nav { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1.2rem; }
+    .cal-nav h2 { flex: 1; font-size: 1.8rem; }
+    .cal-nav button {
+        border: 1px solid #cbd5e1; background: #fff; border-radius: 8px;
+        width: 48px; height: 48px; font-size: 1.6rem; cursor: pointer; color: #0f172a;
+    }
+    .btn-hoy { width: auto !important; padding: 0 1.4rem; font-size: 1rem !important; font-weight: 700; }
+    .semana, .rejilla { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.6rem; }
+    .semana { margin-bottom: 0.6rem; }
+    .semana span {
+        text-align: center; font-size: 0.95rem; font-weight: 800; color: #0f172a;
+        background: #f1f5f9; border-radius: 6px; padding: 0.6rem 0;
+    }
+    .rejilla { min-height: 0; }
+    .dia {
+        min-height: clamp(96px, 11vw, 138px); border: 2px solid #e2e8f0; border-radius: 10px; background: #fff;
+        cursor: pointer; padding: 0.6rem; display: flex; flex-direction: column; gap: 0.4rem;
+        align-items: stretch; text-align: left;
+    }
+    .dia:hover { border-color: #0f172a; background: #f8fafc; }
+    .dia.sel { border-color: #0f172a; background: #f8fafc; box-shadow: 0 0 0 2px #0f172a inset; }
+    .dia.hoy .num { background: #0f172a; color: #fff; }
+    .dia.sel.hoy .num { background: #fff; color: #0f172a; }
+    .num {
+        align-self: flex-start; font-weight: 800; font-size: 1.1rem; color: #0f172a;
+        min-width: 32px; height: 32px; display: grid; place-items: center; border-radius: 50%;
+    }
+    .vacio { min-height: clamp(96px, 11vw, 138px); }
+    .chips { display: flex; flex-direction: column; gap: 0.3rem; }
+    .mini {
+        font-size: 0.78rem; font-weight: 700; padding: 0.3rem 0.5rem; border-radius: 6px;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: left;
+    }
+    .m-parrilla { background: #e2e8f0; color: #0f172a; }
+    .m-subir { background: #dbeafe; color: #1d4ed8; }
+    .m-imagen { background: #f3e8ff; color: #7e22ce; }
+    .m-nota { background: #dcfce7; color: #166534; }
+    .mas { font-size: 0.75rem; font-weight: 700; color: #64748b; }
+    .libre { font-size: 0.8rem; color: #cbd5e1; font-weight: 600; }
+    .abajo { display: grid; grid-template-columns: 1.4fr 1fr; gap: 1rem; align-items: start; }
+    .lista { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.8rem; }
+    .item {
+        border: 1px solid #e2e8f0; border-left-width: 6px; border-radius: 6px;
+        padding: 0.9rem; display: flex; flex-direction: column; gap: 0.35rem; align-items: flex-start;
+        background: #fff;
+    }
+    .item.b-parrilla { border-left-color: #0f172a; }
+    .item.b-subir { border-left-color: #2563eb; }
+    .item.b-imagen { border-left-color: #9333ea; }
+    .item.b-nota { border-left-color: #16a34a; }
+    .item strong { color: #0f172a; font-size: 1rem; }
+    .item .det { color: #64748b; font-size: 0.9rem; }
+    .pill { font-size: 0.75rem; font-weight: 800; padding: 0.2rem 0.7rem; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.04em; }
+    .pill.p-parrilla { background: #e2e8f0; color: #0f172a; }
+    .pill.p-subir { background: #dbeafe; color: #1d4ed8; }
+    .pill.p-imagen { background: #f3e8ff; color: #7e22ce; }
+    .pill.p-nota { background: #dcfce7; color: #166534; }
+    .btn-del { border: none; background: none; color: #dc2626; font-size: 0.85rem; font-weight: 700; cursor: pointer; padding: 0; }
+    .vacio-msg { color: #64748b; }
+    .resumen .res {
+        display: flex; align-items: center; gap: 0.8rem;
+        border: 1px solid #e2e8f0; border-left-width: 6px; border-radius: 6px; padding: 0.8rem 1rem;
+    }
+    .res.parrilla { border-left-color: #0f172a; }
+    .res.subir { border-left-color: #2563eb; }
+    .res.imagen { border-left-color: #9333ea; }
+    .res.nota { border-left-color: #16a34a; }
+    .res strong { color: #0f172a; white-space: nowrap; }
+    .res span { color: #475569; font-size: 0.95rem; }
+    .modal {
+        position: fixed; inset: 0; background: rgba(15,23,42,0.5);
+        display: grid; place-items: center; padding: 1rem; z-index: 50;
+    }
+    .modal[hidden] { display: none; }
+    .modal-caja {
+        background: #fff; border-radius: 8px; padding: 1.5rem;
+        width: 100%; max-width: 440px; display: flex; flex-direction: column; gap: 1rem;
+    }
+    .modal-caja h2 { margin: 0; color: #0f172a; }
+    .modal-caja form { display: flex; flex-direction: column; gap: 0.8rem; }
+    .modal-caja label { display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.9rem; font-weight: 600; color: #0f172a; }
+    .modal-caja input, .modal-caja select, .modal-caja textarea {
+        padding: 0.6rem 0.7rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 1rem;
+    }
+    .modal-acciones { display: flex; justify-content: flex-end; gap: 0.6rem; }
+    .btn-ghost {
+        border: 1px solid #cbd5e1; background: #fff; border-radius: 6px;
+        padding: 0.6rem 1.2rem; cursor: pointer; font-weight: 600; color: #0f172a;
+    }
+    @media (max-width: 960px) {
+        .cal { padding: 1rem; }
+        .cal-top { flex-direction: column; align-items: flex-start; }
+        .abajo { grid-template-columns: 1fr; }
+        .dia { min-height: 84px; }
+        .semana span { font-size: 0.75rem; }
+        .mini { font-size: 0.7rem; }
+    }
+</style>

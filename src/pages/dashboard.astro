@@ -1,0 +1,358 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import GuardiaAuth from "../components/GuardiaAuth.astro";
+---
+
+<BaseLayout title="Iria — Dashboard" description="Iria — Dashboard general.">
+    <GuardiaAuth />
+    <main class="dash">
+        <header class="dash-top">
+            <div>
+                <h1>Dashboard</h1>
+                <p>Resumen general · datos de ejemplo</p>
+            </div>
+            <button type="button" id="boton-volver" class="btn-regresar">
+                Regresar
+            </button>
+        </header>
+
+        <section class="kpis" aria-label="Indicadores">
+            <article class="kpi">
+                <span class="kpi-label">Clientes activos</span>
+                <strong class="kpi-valor">248</strong>
+                <span class="kpi-delta up">+12% vs mes anterior</span>
+            </article>
+            <article class="kpi">
+                <span class="kpi-label">Ingresos del mes</span>
+                <strong class="kpi-valor">$184,500</strong>
+                <span class="kpi-delta up">+8.2% vs mes anterior</span>
+            </article>
+            <article class="kpi">
+                <span class="kpi-label">Reportes generados</span>
+                <strong class="kpi-valor">36</strong>
+                <span class="kpi-delta up">+4 esta semana</span>
+            </article>
+            <article class="kpi">
+                <span class="kpi-label">Tickets pendientes</span>
+                <strong class="kpi-valor">12</strong>
+                <span class="kpi-delta down">-3 vs ayer</span>
+            </article>
+        </section>
+
+        <section class="grid">
+            <article class="card">
+                <h2>Ingresos últimos 7 días</h2>
+                <p class="muted">Datos dummy en miles (MXN)</p>
+                <div class="barras" aria-hidden="true">
+                    <div class="barra" style="--h: 42%">
+                        <span>Lun</span>
+                    </div>
+                    <div class="barra" style="--h: 68%">
+                        <span>Mar</span>
+                    </div>
+                    <div class="barra" style="--h: 55%">
+                        <span>Mié</span>
+                    </div>
+                    <div class="barra" style="--h: 82%">
+                        <span>Jue</span>
+                    </div>
+                    <div class="barra" style="--h: 64%">
+                        <span>Vie</span>
+                    </div>
+                    <div class="barra" style="--h: 90%">
+                        <span>Sáb</span>
+                    </div>
+                    <div class="barra" style="--h: 74%">
+                        <span>Dom</span>
+                    </div>
+                </div>
+            </article>
+
+            <article class="card">
+                <h2>Actividad reciente</h2>
+                <p class="muted">Últimos movimientos de ejemplo</p>
+                <ul class="actividad">
+                    <li>
+                        <strong>Nuevo cliente registrado</strong>
+                        <span>Distribuidora Andalucía · hace 2 h</span>
+                    </li>
+                    <li>
+                        <strong>Reporte mensual exportado</strong>
+                        <span>Operaciones · hace 5 h</span>
+                    </li>
+                    <li>
+                        <strong>Ticket resuelto #1042</strong>
+                        <span>Soporte · ayer</span>
+                    </li>
+                    <li>
+                        <strong>Meta de ingresos al 78%</strong>
+                        <span>Dirección · ayer</span>
+                    </li>
+                </ul>
+            </article>
+        </section>
+
+        <section class="card">
+            <h2>Últimos clientes</h2>
+            <p class="muted">Tabla de ejemplo</p>
+            <div class="tabla-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Cliente</th>
+                            <th>Pendientes</th>
+                            <th>Estado</th>
+                            <th>Último cambio</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Café Roma Norte</td>
+                            <td>2 reels por subir</td>
+                            <td><span class="pill ok">Activo</span></td>
+                            <td>Parrilla · hace 20 min</td>
+                        </tr>
+                        <tr>
+                            <td>Taller Hernández</td>
+                            <td>Aprobar parrilla</td>
+                            <td><span class="pill ok">Activo</span></td>
+                            <td>Copies · hace 1 h</td>
+                        </tr>
+                        <tr>
+                            <td>Librería Gandi Sur</td>
+                            <td>4 fotos por crear</td>
+                            <td><span class="pill warn">Pendiente</span></td>
+                            <td>Imágenes · ayer</td>
+                        </tr>
+                        <tr>
+                            <td>Clínica Santa Fe</td>
+                            <td>1 carrusel por subir</td>
+                            <td><span class="pill ok">Activo</span></td>
+                            <td>Reporte · ayer</td>
+                        </tr>
+                        <tr>
+                            <td>Hotel Catedral</td>
+                            <td>Sin pendientes</td>
+                            <td><span class="pill off">Inactivo</span></td>
+                            <td>Reels · hace 3 días</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+</BaseLayout>
+
+<script>
+    document.getElementById("boton-volver")?.addEventListener("click", () => {
+        window.location.href = "/ind_2";
+    });
+</script>
+
+<style>
+    .dash {
+        min-height: 100vh;
+        background: #f1f5f9;
+        padding: 1.5rem;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+        width: 100%;
+        margin: 0;
+    }
+    .dash-top {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 1.5rem 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+    }
+    .dash-top h1 {
+        margin: 0;
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: #0f172a;
+    }
+    .dash-top p {
+        margin: 0.25rem 0 0;
+        color: #64748b;
+    }
+    .btn-regresar {
+        border: none;
+        border-radius: 6px;
+        background: #0f172a;
+        color: #fff;
+        padding: 0.6rem 2rem;
+        font-size: 1rem;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+    .btn-regresar:hover {
+        background: #1e293b;
+    }
+    .kpis {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1rem;
+    }
+    .kpi {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 1.2rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+    }
+    .kpi-label {
+        font-size: 0.9rem;
+        color: #64748b;
+        font-weight: 600;
+    }
+    .kpi-valor {
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: #0f172a;
+    }
+    .kpi-delta {
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+    .kpi-delta.up {
+        color: #16a34a;
+    }
+    .kpi-delta.down {
+        color: #dc2626;
+    }
+    .grid {
+        display: grid;
+        grid-template-columns: 1.2fr 1fr;
+        gap: 1rem;
+    }
+    .card {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 1.5rem;
+    }
+    .card h2 {
+        margin: 0;
+        font-size: 1.1rem;
+        color: #0f172a;
+    }
+    .muted {
+        margin: 0.25rem 0 1rem;
+        color: #64748b;
+        font-size: 0.9rem;
+    }
+    .barras {
+        display: flex;
+        align-items: flex-end;
+        gap: 0.8rem;
+        height: 180px;
+        padding-top: 0.5rem;
+    }
+    .barra {
+        flex: 1;
+        background: #e2e8f0;
+        border-radius: 6px 6px 0 0;
+        height: var(--h);
+        min-height: 24px;
+        position: relative;
+        display: flex;
+        justify-content: center;
+    }
+    .barra:nth-child(4),
+    .barra:nth-child(6) {
+        background: #0f172a;
+    }
+    .barra span {
+        position: absolute;
+        bottom: -1.5rem;
+        font-size: 0.8rem;
+        color: #64748b;
+    }
+    .actividad {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+    .actividad li {
+        display: flex;
+        flex-direction: column;
+        gap: 0.15rem;
+        border-left: 3px solid #e2e8f0;
+        padding-left: 0.8rem;
+    }
+    .actividad strong {
+        color: #0f172a;
+        font-size: 0.95rem;
+    }
+    .actividad span {
+        color: #64748b;
+        font-size: 0.85rem;
+    }
+    .tabla-wrap {
+        overflow-x: auto;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.95rem;
+    }
+    th,
+    td {
+        text-align: left;
+        padding: 0.7rem 0.6rem;
+        border-bottom: 1px solid #e2e8f0;
+        color: #0f172a;
+        white-space: nowrap;
+    }
+    th {
+        color: #64748b;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    .pill {
+        display: inline-block;
+        padding: 0.15rem 0.7rem;
+        border-radius: 999px;
+        font-size: 0.8rem;
+        font-weight: 700;
+    }
+    .pill.ok {
+        background: #dcfce7;
+        color: #166534;
+    }
+    .pill.warn {
+        background: #fef9c3;
+        color: #854d0e;
+    }
+    .pill.off {
+        background: #f1f5f9;
+        color: #64748b;
+    }
+    @media (max-width: 900px) {
+        .kpis {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        .grid {
+            grid-template-columns: 1fr;
+        }
+        .dash {
+            padding: 1rem;
+        }
+        .dash-top {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+    }
+</style>

@@ -1,0 +1,20 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import GuardiaAuth from "../components/GuardiaAuth.astro";
+import VistaIndicador from "../components/VistaIndicador.astro";
+---
+
+<BaseLayout title="Iria — Connect" description="Iria — Connect.">
+    <GuardiaAuth />
+    <main>
+        <VistaIndicador
+            titulo="Connect"
+            etiquetaBoton="Connect"
+            opciones={[
+                { id: "clientes", etiqueta: "Clientes", href: "/client" },
+                { id: "dashboard", etiqueta: "Dashboard", href: "/dashboard" },
+                { id: "reportes", etiqueta: "Reportes" },
+            ]}
+        />
+    </main>
+</BaseLayout>

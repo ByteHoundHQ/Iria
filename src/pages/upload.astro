@@ -1,0 +1,406 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import GuardiaAuth from "../components/GuardiaAuth.astro";
+---
+
+<BaseLayout title="Iria — Archivos" description="Iria — Drive de archivos.">
+    <GuardiaAuth />
+    <main class="drive">
+        <header class="drive-top">
+            <div>
+                <h1>Archivos</h1>
+                <p>Sube y organiza tus archivos · solo frontend, datos de ejemplo</p>
+            </div>
+            <div class="drive-acciones">
+                <label for="input-archivos" class="btn-primary como-boton">
+                    + Subir archivos
+                </label>
+                <input id="input-archivos" type="file" multiple hidden />
+                <button type="button" id="boton-volver" class="btn-regresar">
+                    Regresar
+                </button>
+            </div>
+        </header>
+
+        <div class="drive-layout">
+            <aside class="card lateral">
+                <nav class="menu" aria-label="Secciones del drive">
+                    <button type="button" class="menu-btn activo" data-filtro="unidad">Mi unidad</button>
+                    <button type="button" class="menu-btn" data-filtro="compartidos">Compartidos</button>
+                    <button type="button" class="menu-btn" data-filtro="recientes">Recientes</button>
+                    <button type="button" class="menu-btn" data-filtro="destacados">Destacados</button>
+                    <button type="button" class="menu-btn" data-filtro="papelera">Papelera</button>
+                </nav>
+                <div class="storage">
+                    <strong>Almacenamiento</strong>
+                    <div class="barra"><span style="width: 48%"></span></div>
+                    <span class="muted">7.2 GB de 15 GB usados</span>
+                </div>
+            </aside>
+
+            <section class="contenido">
+                <div id="zona" class="card zona">
+                    <strong>Arrastra tus archivos aquí</strong>
+                    <span class="muted">o usa el botón «+ Subir archivos»</span>
+                </div>
+
+                <div class="toolbar">
+                    <input id="buscador" type="search" placeholder="Buscar archivos…" autocomplete="off" />
+                    <select id="orden" aria-label="Ordenar">
+                        <option value="nombre">Orden: Nombre</option>
+                        <option value="fecha">Orden: Recientes</option>
+                    </select>
+                    <div class="vistas" role="group" aria-label="Vista">
+                        <button type="button" id="v-grid" class="vbtn activo" aria-label="Vista cuadrícula">▦</button>
+                        <button type="button" id="v-lista" class="vbtn" aria-label="Vista lista">☰</button>
+                    </div>
+                </div>
+
+                <p id="contador" class="muted"></p>
+                <div id="archivos" class="parrilla"></div>
+                <p id="vacio" class="vacio-msg" hidden>Sin archivos en esta sección.</p>
+            </section>
+        </div>
+
+        <div id="toast" class="toast" hidden></div>
+    </main>
+</BaseLayout>
+
+<script>
+    const semillas = [
+        { id: "s1", nombre: "parrilla-octubre.pdf", peso: "2.4 MB", fecha: "Hace 2 h", tag: "unidad", ext: "PDF" },
+        { id: "s2", nombre: "reels-catedral.mp4", peso: "48.1 MB", fecha: "Ayer", tag: "unidad", ext: "MP4" },
+        { id: "s3", nombre: "fotos-libreria.zip", peso: "132 MB", fecha: "Ayer", tag: "compartidos", ext: "ZIP" },
+        { id: "s4", nombre: "logo-cliente.png", peso: "1.1 MB", fecha: "Hace 3 días", tag: "destacados", ext: "PNG" },
+        { id: "s5", nombre: "reporte-mensual.xlsx", peso: "860 KB", fecha: "Hace 3 días", tag: "recientes", ext: "XLSX" },
+        { id: "s6", nombre: "copies-cafe-roma.docx", peso: "240 KB", fecha: "Hace 5 días", tag: "compartidos", ext: "DOCX" },
+        { id: "s7", nombre: "portada-nordica.jpg", peso: "3.8 MB", fecha: "Semana pasada", tag: "unidad", ext: "JPG" },
+        { id: "s8", nombre: "brief-santa-fe.pdf", peso: "900 KB", fecha: "Semana pasada", tag: "papelera", ext: "PDF" },
+        { id: "s9", nombre: "presentacion-q4.pptx", peso: "12.6 MB", fecha: "Semana pasada", tag: "recientes", ext: "PPTX" },
+    ];
+
+    const estado = { archivos: [...semillas], filtro: "unidad", q: "", orden: "nombre", vista: "grid" };
+
+    const cont = document.getElementById("archivos");
+    const contador = document.getElementById("contador");
+    const vacio = document.getElementById("vacio");
+    const buscador = document.getElementById("buscador") as HTMLInputElement | null;
+    const orden = document.getElementById("orden") as HTMLSelectElement | null;
+    const zona = document.getElementById("zona");
+    const input = document.getElementById("input-archivos") as HTMLInputElement | null;
+    const toast = document.getElementById("toast");
+
+    function colorPorExt(ext) {
+        const e = (ext || "").toUpperCase();
+        if (["PNG", "JPG", "JPEG", "WEBP", "SVG"].includes(e)) return "c-img";
+        if (["MP4", "MOV", "AVI"].includes(e)) return "c-vid";
+        if (["PDF"].includes(e)) return "c-pdf";
+        if (["ZIP", "RAR"].includes(e)) return "c-zip";
+        return "c-doc";
+    }
+
+    function formatear(n) {
+        if (n < 1024) return `${n} B`;
+        if (n < 1048576) return `${(n / 1024).toFixed(0)} KB`;
+        if (n < 1073741824) return `${(n / 1048576).toFixed(1)} MB`;
+        return `${(n / 1073741824).toFixed(2)} GB`;
+    }
+
+    let toastTimer;
+    function avisar(msg) {
+        if (!toast) return;
+        toast.textContent = msg;
+        toast.removeAttribute("hidden");
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toast.setAttribute("hidden", ""), 2600);
+    }
+
+    function visibles() {
+        let lista = estado.archivos.filter((a) => {
+            const porTag = estado.filtro === "unidad"
+                ? a.tag !== "papelera"
+                : a.tag === estado.filtro;
+            const porQ = !estado.q || a.nombre.toLowerCase().includes(estado.q);
+            return porTag && porQ;
+        });
+        if (estado.orden === "nombre") lista = [...lista].sort((a, b) => a.nombre.localeCompare(b.nombre));
+        return lista;
+    }
+
+    function descargar(a) {
+        let url, nombre = a.nombre;
+        if (a.file) {
+            url = URL.createObjectURL(a.file);
+        } else {
+            url = URL.createObjectURL(new Blob([`Archivo de ejemplo: ${a.nombre}\nSolo frontend.`], { type: "text/plain" }));
+            nombre = `${a.nombre}.txt`;
+        }
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = nombre;
+        link.click();
+        setTimeout(() => URL.revokeObjectURL(url), 4000);
+    }
+
+    function pintar() {
+        if (!cont) return;
+        cont.className = estado.vista === "grid" ? "parrilla" : "filas";
+        cont.innerHTML = "";
+        const lista = visibles();
+        if (contador) contador.textContent = `${lista.length} archivo(s)`;
+        vacio?.toggleAttribute("hidden", lista.length !== 0);
+
+        lista.forEach((a) => {
+            const ext = a.ext ?? (a.nombre.split(".").pop() ?? "").toUpperCase();
+            const tarjeta = document.createElement("article");
+            tarjeta.className = "file";
+
+            const icono = document.createElement("span");
+            icono.className = `thumb ${colorPorExt(ext)}`;
+
+            if (a.mini) {
+                const img = document.createElement("img");
+                img.src = a.mini;
+                img.alt = "";
+                icono.appendChild(img);
+            } else {
+                icono.textContent = ext.slice(0, 4);
+            }
+
+            const info = document.createElement("div");
+            info.className = "file-info";
+            const nom = document.createElement("strong");
+            nom.textContent = a.nombre;
+            nom.title = a.nombre;
+            const meta = document.createElement("span");
+            meta.className = "muted";
+            meta.textContent = `${a.peso} · ${a.fecha}`;
+            info.appendChild(nom);
+            info.appendChild(meta);
+
+            const acc = document.createElement("div");
+            acc.className = "file-acc";
+            const btnDown = document.createElement("button");
+            btnDown.type = "button";
+            btnDown.className = "mini-btn";
+            btnDown.textContent = "Descargar";
+            btnDown.addEventListener("click", () => descargar(a));
+            const btnDel = document.createElement("button");
+            btnDel.type = "button";
+            btnDel.className = "mini-btn peligro";
+            btnDel.textContent = estado.filtro === "papelera" ? "Eliminar" : "A papelera";
+            btnDel.addEventListener("click", () => {
+                if (estado.filtro === "papelera") {
+                    estado.archivos = estado.archivos.filter((x) => x.id !== a.id);
+                    avisar(`«${a.nombre}» eliminado.`);
+                } else {
+                    a.tag = "papelera";
+                    avisar(`«${a.nombre}» movido a papelera.`);
+                }
+                pintar();
+            });
+            acc.appendChild(btnDown);
+            acc.appendChild(btnDel);
+
+            tarjeta.appendChild(icono);
+            tarjeta.appendChild(info);
+            tarjeta.appendChild(acc);
+            cont.appendChild(tarjeta);
+        });
+    }
+
+    function agregar(files) {
+        const nuevos = Array.from(files ?? []).map((f) => ({
+            id: `u${Date.now()}-${f.name}`,
+            nombre: f.name,
+            peso: formatear(f.size),
+            fecha: "Ahora mismo",
+            tag: "unidad",
+            ext: (f.name.split(".").pop() ?? "").toUpperCase(),
+            file: f,
+            mini: f.type.startsWith("image/") ? URL.createObjectURL(f) : null,
+        }));
+        if (!nuevos.length) return;
+        estado.archivos = [...nuevos, ...estado.archivos];
+        if (estado.filtro !== "unidad") {
+            document.querySelectorAll(".menu-btn").forEach((b) => b.classList.remove("activo"));
+            document.querySelector('[data-filtro="unidad"]')?.classList.add("activo");
+            estado.filtro = "unidad";
+        }
+        pintar();
+        avisar(`${nuevos.length} archivo(s) subido(s). Solo frontend.`);
+    }
+
+    document.getElementById("boton-volver")?.addEventListener("click", () => { window.location.href = "/ind_3"; });
+    input?.addEventListener("change", () => { agregar(input.files); input.value = ""; });
+
+    ["dragenter", "dragover"].forEach((ev) => zona?.addEventListener(ev, (e) => {
+        e.preventDefault();
+        zona.classList.add("over");
+    }));
+    ["dragleave", "drop"].forEach((ev) => zona?.addEventListener(ev, (e) => {
+        e.preventDefault();
+        zona.classList.remove("over");
+    }));
+    zona?.addEventListener("drop", (e) => agregar(e.dataTransfer?.files));
+
+    document.querySelectorAll(".menu-btn").forEach((b) => {
+        b.addEventListener("click", () => {
+            document.querySelectorAll(".menu-btn").forEach((x) => x.classList.remove("activo"));
+            b.classList.add("activo");
+            estado.filtro = (b as HTMLElement).dataset.filtro ?? "unidad";
+            pintar();
+        });
+    });
+
+    buscador?.addEventListener("input", () => {
+        estado.q = (buscador.value ?? "").trim().toLowerCase();
+        pintar();
+    });
+    orden?.addEventListener("change", () => {
+        estado.orden = orden.value;
+        pintar();
+    });
+    document.getElementById("v-grid")?.addEventListener("click", () => {
+        estado.vista = "grid";
+        document.getElementById("v-grid")?.classList.add("activo");
+        document.getElementById("v-lista")?.classList.remove("activo");
+        pintar();
+    });
+    document.getElementById("v-lista")?.addEventListener("click", () => {
+        estado.vista = "lista";
+        document.getElementById("v-lista")?.classList.add("activo");
+        document.getElementById("v-grid")?.classList.remove("activo");
+        pintar();
+    });
+
+    pintar();
+</script>
+
+<style is:global>
+    .drive {
+        min-height: 100vh;
+        background: #f1f5f9;
+        padding: 1.5rem;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        gap: 1.2rem;
+        width: 100%;
+        margin: 0;
+    }
+    .drive button { font-family: inherit; }
+    .drive-top {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+    }
+    .drive-top h1 { margin: 0; font-size: 1.75rem; font-weight: 800; color: #0f172a; }
+    .drive-top p { margin: 0.25rem 0 0; color: #64748b; }
+    .drive-acciones { display: flex; gap: 0.6rem; align-items: center; }
+    .btn-primary {
+        border: none; border-radius: 6px; background: #0f172a; color: #fff;
+        padding: 0.6rem 1.4rem; font-size: 1rem; font-weight: 700; cursor: pointer; white-space: nowrap;
+    }
+    .btn-primary:hover { background: #1e293b; }
+    .como-boton { display: inline-block; }
+    .btn-regresar {
+        border: 1px solid #cbd5e1; border-radius: 6px; background: #fff; color: #0f172a;
+        padding: 0.6rem 1.4rem; font-size: 1rem; font-weight: 600; cursor: pointer; white-space: nowrap;
+    }
+    .btn-regresar:hover { background: #f8fafc; }
+    .drive-layout {
+        display: grid;
+        grid-template-columns: 240px 1fr;
+        gap: 1rem;
+        align-items: start;
+    }
+    .card { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.2rem; }
+    .lateral { display: flex; flex-direction: column; gap: 1.2rem; position: sticky; top: 1rem; }
+    .menu { display: flex; flex-direction: column; gap: 0.3rem; }
+    .menu-btn {
+        text-align: left; border: none; background: none; cursor: pointer;
+        padding: 0.6rem 0.8rem; border-radius: 6px; font-weight: 600; color: #475569; font-size: 0.95rem;
+    }
+    .menu-btn:hover { background: #f1f5f9; }
+    .menu-btn.activo { background: #0f172a; color: #fff; }
+    .storage { border-top: 1px solid #e2e8f0; padding-top: 1rem; display: flex; flex-direction: column; gap: 0.5rem; }
+    .storage strong { color: #0f172a; font-size: 0.9rem; }
+    .barra { height: 8px; background: #e2e8f0; border-radius: 999px; overflow: hidden; }
+    .barra span { display: block; height: 100%; background: #0f172a; }
+    .muted { color: #64748b; font-size: 0.85rem; }
+    .contenido { display: flex; flex-direction: column; gap: 1rem; min-width: 0; }
+    .zona {
+        border: 2px dashed #cbd5e1; text-align: center; padding: 2rem 1rem;
+        display: flex; flex-direction: column; gap: 0.25rem; cursor: pointer;
+    }
+    .zona strong { color: #0f172a; font-size: 1.05rem; }
+    .zona.over { border-color: #0f172a; background: #f8fafc; }
+    .toolbar { display: flex; gap: 0.6rem; align-items: center; }
+    .toolbar input {
+        flex: 1; padding: 0.7rem 0.9rem; border: 1px solid #cbd5e1;
+        border-radius: 6px; font-size: 0.95rem; background: #fff; color: #0f172a; min-width: 0;
+    }
+    .toolbar select {
+        padding: 0.7rem; border: 1px solid #cbd5e1; border-radius: 6px;
+        background: #fff; color: #0f172a; font-weight: 600;
+    }
+    .vistas { display: flex; gap: 0.3rem; }
+    .vbtn {
+        width: 40px; height: 40px; border: 1px solid #cbd5e1; background: #fff;
+        border-radius: 6px; cursor: pointer; font-size: 1.1rem; color: #475569;
+    }
+    .vbtn.activo { background: #0f172a; color: #fff; border-color: #0f172a; }
+    .parrilla { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 0.8rem; }
+    .filas { display: flex; flex-direction: column; gap: 0.6rem; }
+    .file {
+        background: #fff; border: 1px solid #e2e8f0; border-radius: 8px;
+        padding: 1rem; display: flex; flex-direction: column; gap: 0.8rem;
+    }
+    .filas .file { flex-direction: row; align-items: center; }
+    .filas .file-info { flex: 1; }
+    .file:hover { border-color: #0f172a; }
+    .thumb {
+        width: 100%; height: 110px; border-radius: 6px; display: grid; place-items: center;
+        font-weight: 800; font-size: 1.1rem; overflow: hidden; color: #fff;
+    }
+    .filas .thumb { width: 56px; height: 56px; flex: 0 0 auto; font-size: 0.8rem; }
+    .thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .c-img { background: #16a34a; }
+    .c-vid { background: #9333ea; }
+    .c-pdf { background: #dc2626; }
+    .c-zip { background: #b45309; }
+    .c-doc { background: #0f172a; }
+    .file-info { display: flex; flex-direction: column; gap: 0.15rem; min-width: 0; }
+    .file-info strong {
+        color: #0f172a; font-size: 0.92rem; white-space: nowrap;
+        overflow: hidden; text-overflow: ellipsis;
+    }
+    .file-acc { display: flex; gap: 0.4rem; }
+    .mini-btn {
+        flex: 1; border: 1px solid #cbd5e1; background: #fff; border-radius: 6px;
+        padding: 0.45rem 0.5rem; font-size: 0.8rem; font-weight: 700; color: #0f172a; cursor: pointer;
+    }
+    .mini-btn:hover { background: #f8fafc; border-color: #0f172a; }
+    .mini-btn.peligro { color: #dc2626; }
+    .vacio-msg { text-align: center; color: #64748b; }
+    .toast {
+        position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%);
+        background: #0f172a; color: #fff; padding: 0.7rem 1.4rem; border-radius: 8px;
+        font-size: 0.9rem; font-weight: 600; z-index: 60; max-width: 90vw;
+    }
+    .toast[hidden] { display: none; }
+    @media (max-width: 860px) {
+        .drive { padding: 1rem; }
+        .drive-top { flex-direction: column; align-items: flex-start; }
+        .drive-layout { grid-template-columns: 1fr; }
+        .lateral { position: static; }
+        .menu { flex-direction: row; flex-wrap: wrap; }
+        .toolbar { flex-wrap: wrap; }
+    }
+</style>
