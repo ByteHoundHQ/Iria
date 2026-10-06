@@ -25,14 +25,13 @@
                         fill="#ffffff"></path>
                 </svg>
 
-                <form id="login-form">
+                <form id="login-form" novalidate>
                     <label for="email">Email</label>
                     <input
                         id="email"
                         name="email"
                         type="email"
                         autocomplete="username"
-                        required
                     />
 
                     <label for="password">Password</label>
@@ -41,7 +40,6 @@
                         name="password"
                         type="password"
                         autocomplete="current-password"
-                        required
                     />
 
                     <div class="btn-group">
@@ -49,7 +47,7 @@
                         <button type="button" id="btn-signup">Sign Up</button>
                     </div>
 
-                    <p id="form-feedback"></p>
+                    <p id="form-feedback" role="alert" aria-live="polite"></p>
                 </form>
             </div>
         </div>
@@ -75,33 +73,123 @@
     const feedback = document.getElementById("form-feedback");
     const signupBtn = document.getElementById("btn-signup");
 
+    function mostrarAviso(
+        variante: "error" | "info",
+        mensaje: string,
+        resaltar: HTMLElement[] = [],
+    ) {
+        if (!feedback) return;
+        feedback.dataset.variant = variante;
+        feedback.textContent = mensaje;
+        // Reinicia la animación para que se note cada aviso
+        feedback.classList.remove("aviso-pop");
+        void feedback.offsetWidth;
+        feedback.classList.add("aviso-pop");
+        form?.classList.remove("sacudir");
+        if (variante === "error") {
+            void form?.offsetWidth;
+            form?.classList.add("sacudir");
+        }
+        [emailInput, passInput].forEach((i) =>
+            i?.classList.remove("input-error"),
+        );
+        resaltar.forEach((i) => i.classList.add("input-error"));
+    }
+
+    function limpiarAviso() {
+        if (!feedback) return;
+        feedback.textContent = "";
+        feedback.removeAttribute("data-variant");
+        feedback.classList.remove("aviso-pop");
+    }
+
+    [emailInput, passInput].forEach((i) =>
+        i?.addEventListener("input", () => {
+            i.classList.remove("input-error");
+            const correoActual = emailInput?.value.trim() ?? "";
+            // Si el correo ya es válido, quita el aviso de formato
+            if (
+                feedback?.textContent?.includes("correo válido") &&
+                esCorreoValido(correoActual)
+            ) {
+                limpiarAviso();
+                return;
+            }
+            if (!emailInput?.value && !passInput?.value) limpiarAviso();
+        }),
+    );
+
+    function esCorreoValido(correo: string): boolean {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(correo);
+    }
+
     form?.addEventListener("submit", (e) => {
         e.preventDefault();
-        if (feedback) feedback.textContent = "";
+        limpiarAviso();
 
         const email = emailInput?.value.trim() ?? "";
         const password = passInput?.value ?? "";
 
-        if (!email || !password) {
-            if (feedback) feedback.textContent = "Completa correo y contraseña.";
+        if (!email && !password) {
+            mostrarAviso(
+                "error",
+                "Ingresa tu correo y contraseña para continuar.",
+                [emailInput, passInput].filter(
+                    (x): x is HTMLInputElement => !!x,
+                ),
+            );
+            return;
+        }
+
+        if (!email) {
+            mostrarAviso("error", "Te falta ingresar tu correo.", [
+                emailInput as HTMLInputElement,
+            ]);
+            return;
+        }
+
+        if (!esCorreoValido(email)) {
+            mostrarAviso(
+                "error",
+                "Ingresa un correo válido, por ejemplo nombre@ejemplo.com.",
+                [emailInput as HTMLInputElement],
+            );
+            return;
+        }
+
+        if (!password) {
+            mostrarAviso("error", "Te falta ingresar tu contraseña.", [
+                passInput as HTMLInputElement,
+            ]);
             return;
         }
 
         if (!credencialesConfiguradas()) {
-            if (feedback) feedback.textContent = "Error: .env no configurado";
+            mostrarAviso(
+                "error",
+                "No pudimos validar tus datos (configuración faltante).",
+            );
             return;
         }
 
         if (iniciarSesion(email, password)) {
             window.location.href = "/seleccion";
         } else {
-            if (feedback)
-                feedback.textContent = "Correo o contraseña incorrectos.";
+            mostrarAviso(
+                "error",
+                "Correo o contraseña incorrectos. Inténtalo de nuevo.",
+                [emailInput, passInput].filter(
+                    (x): x is HTMLInputElement => !!x,
+                ),
+            );
         }
     });
 
     signupBtn?.addEventListener("click", () => {
-        if (feedback) feedback.textContent = "El registro está deshabilitado.";
+        mostrarAviso(
+            "info",
+            "El registro está deshabilitado. Usa tu cuenta existente.",
+        );
     });
 </script>
 
@@ -247,12 +335,91 @@
     .btn-group button:hover {
         background: #2f1b0d;
     }
+    #login-form input.input-error {
+        border-bottom-color: #c1121f;
+        background: linear-gradient(
+            transparent,
+            rgba(193, 18, 31, 0.07)
+        );
+    }
+    #form-feedback:empty {
+        display: none;
+    }
     #form-feedback {
-        min-height: 1.2em;
+        display: flex;
+        align-items: flex-start;
+        gap: 0.6rem;
+        margin: 1rem 0 0;
+        padding: 0.7rem 0.9rem;
+        border-radius: 14px;
         font-size: 0.9rem;
-        color: #b91c1c;
-        text-align: center;
-        margin: 0.9rem 0 0;
+        font-weight: 600;
+        line-height: 1.4;
+    }
+    #form-feedback::before {
+        content: "!";
+        flex-shrink: 0;
+        width: 22px;
+        height: 22px;
+        border-radius: 999px;
+        display: grid;
+        place-items: center;
+        font-size: 0.85rem;
+        font-weight: 800;
+        margin-top: 0.05rem;
+    }
+    #form-feedback[data-variant="error"] {
+        background: #fdecec;
+        border: 1px solid #f0b4b4;
+        color: #7a0d0d;
+        box-shadow: 0 6px 18px rgba(122, 13, 13, 0.12);
+    }
+    #form-feedback[data-variant="error"]::before {
+        background: #7a0d0d;
+        color: #fff6e3;
+    }
+    #form-feedback[data-variant="info"] {
+        background: #fff6d9;
+        border: 1px solid #e7d48b;
+        color: #4a2c17;
+        box-shadow: 0 6px 18px rgba(74, 44, 23, 0.12);
+    }
+    #form-feedback[data-variant="info"]::before {
+        content: "i";
+        background: #4a2c17;
+        color: #fff6e3;
+        font-style: italic;
+    }
+    #login-form.sacudir {
+        animation: sacudir 0.35s ease;
+    }
+    .aviso-pop {
+        animation: aviso-entrada 0.25s ease;
+    }
+    @keyframes aviso-entrada {
+        from {
+            opacity: 0;
+            transform: translateY(-4px) scale(0.99);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+    @keyframes sacudir {
+        0%,
+        100% {
+            transform: translateX(0);
+        }
+        25% {
+            transform: translateX(-5px);
+        }
+        50% {
+            transform: translateX(5px);
+        }
+        75% {
+            transform: translateX(-3px);
+        }
     }
 
     @media (max-width: 900px) {
