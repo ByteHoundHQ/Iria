@@ -4,30 +4,37 @@
 <div class="sel-min">
     <div class="tarjeta">
         <div class="circulos" role="group" aria-label="Opciones de selección">
-            <button
-                type="button"
+            <a
+                href="/ind_1"
                 class="circulo circulo-communicate"
                 data-btn="Btn1"
+                data-astro-prefetch
             >
                 <span>Communicate</span>
-            </button>
-            <button
-                type="button"
+            </a>
+            <a
+                href="/ind_3"
                 class="circulo circulo-create"
                 data-btn="Btn3"
+                data-astro-prefetch
             >
                 <span>Create</span>
-            </button>
-            <button
-                type="button"
+            </a>
+            <a
+                href="/ind_2"
                 class="circulo circulo-connect"
                 data-btn="Btn2"
+                data-astro-prefetch
             >
                 <span>Connect</span>
-            </button>
+            </a>
         </div>
         <div class="pregunta">
-            <h1>¿En qué te<br />enfocarás hoy?</h1>
+            <h1>
+                ¿En qué te
+                <br />
+                enfocarás hoy?
+            </h1>
         </div>
     </div>
     <button type="button" id="boton-regresar" class="btn-regresar">
@@ -36,13 +43,9 @@
 </div>
 
 <script>
-    const rutas: Record<string, string> = {
-        Btn1: "/ind_1",
-        Btn2: "/ind_2",
-        Btn3: "/ind_3",
-    };
+    import { prefetch } from "astro:prefetch";
 
-    const botones = document.querySelectorAll<HTMLButtonElement>("[data-btn]");
+    const botones = document.querySelectorAll<HTMLAnchorElement>("[data-btn]");
 
     botones.forEach((boton) => {
         boton.addEventListener("click", () => {
@@ -50,13 +53,22 @@
             window.dispatchEvent(
                 new CustomEvent("iria:seleccion", { detail: nombre }),
             );
-
-            const destino = rutas[nombre];
-            if (destino) {
-                window.location.href = destino;
-            }
         });
     });
+
+    const destinos = Array.from(botones)
+        .map((boton) => boton.getAttribute("href"))
+        .filter((href): href is string => Boolean(href));
+
+    const precargarDestinos = () => {
+        destinos.forEach((destino) => prefetch(destino));
+    };
+
+    if ("requestIdleCallback" in window) {
+        window.requestIdleCallback(precargarDestinos, { timeout: 1000 });
+    } else {
+        window.setTimeout(precargarDestinos, 300);
+    }
 </script>
 
 <style>
@@ -109,6 +121,7 @@
         font-weight: 700;
         line-height: 1;
         letter-spacing: -0.02em;
+        text-decoration: none;
         cursor: pointer;
         transition:
             filter 180ms ease,

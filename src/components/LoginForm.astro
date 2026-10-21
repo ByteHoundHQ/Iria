@@ -1,5 +1,4 @@
 ---
-
 ---
 
 <div class="login-layout" data-vista-login>
@@ -22,7 +21,8 @@
                 >
                     <path
                         d="M0,238 C0,200 16,188 42,183 C68,178 78,172 88,150 L106,98 C112,82 122,68 144,68 L400,68 L400,600 L0,600 Z"
-                        fill="#ffffff"></path>
+                        fill="#ffffff"
+                    ></path>
                 </svg>
 
                 <form id="login-form" novalidate>
@@ -43,8 +43,12 @@
                     />
 
                     <div class="btn-group">
-                        <button type="submit" id="btn-submit">Log In</button>
-                        <button type="button" id="btn-signup">Sign Up</button>
+                        <button type="submit" id="btn-submit">
+                            Log In
+                        </button>
+                        <button type="button" id="btn-signup">
+                            Sign Up
+                        </button>
                     </div>
 
                     <p id="form-feedback" role="alert" aria-live="polite"></p>
@@ -55,6 +59,7 @@
 </div>
 
 <script>
+    import { prefetch } from "astro:prefetch";
     import {
         cerrarSesion,
         credencialesConfiguradas,
@@ -63,13 +68,20 @@
 
     cerrarSesion();
 
-    const form = document.getElementById("login-form") as HTMLFormElement | null;
+    prefetch("/seleccion");
+
+    const form = document.getElementById(
+        "login-form",
+    ) as HTMLFormElement | null;
     const emailInput = document.getElementById(
         "email",
     ) as HTMLInputElement | null;
     const passInput = document.getElementById(
         "password",
     ) as HTMLInputElement | null;
+    const submitBtn = document.getElementById(
+        "btn-submit",
+    ) as HTMLButtonElement | null;
     const feedback = document.getElementById("form-feedback");
     const signupBtn = document.getElementById("btn-signup");
 
@@ -81,7 +93,6 @@
         if (!feedback) return;
         feedback.dataset.variant = variante;
         feedback.textContent = mensaje;
-        // Reinicia la animación para que se note cada aviso
         feedback.classList.remove("aviso-pop");
         void feedback.offsetWidth;
         feedback.classList.add("aviso-pop");
@@ -107,7 +118,6 @@
         i?.addEventListener("input", () => {
             i.classList.remove("input-error");
             const correoActual = emailInput?.value.trim() ?? "";
-            // Si el correo ya es válido, quita el aviso de formato
             if (
                 feedback?.textContent?.includes("correo válido") &&
                 esCorreoValido(correoActual)
@@ -173,6 +183,10 @@
         }
 
         if (iniciarSesion(email, password)) {
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.textContent = "Ingresando…";
+            }
             window.location.href = "/seleccion";
         } else {
             mostrarAviso(
@@ -335,12 +349,13 @@
     .btn-group button:hover {
         background: #2f1b0d;
     }
+    .btn-group button:disabled {
+        opacity: 0.7;
+        cursor: progress;
+    }
     #login-form input.input-error {
         border-bottom-color: #c1121f;
-        background: linear-gradient(
-            transparent,
-            rgba(193, 18, 31, 0.07)
-        );
+        background: linear-gradient(transparent, rgba(193, 18, 31, 0.07));
     }
     #form-feedback:empty {
         display: none;

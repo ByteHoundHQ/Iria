@@ -6,21 +6,25 @@ import SelectorCirculos from "./SelectorCirculos.astro";
     <SelectorCirculos />
 </section>
 
-<script>
-    import { cerrarSesion, estaAutenticado } from "../lib/auth.ts";
-
-    // El panel nace oculto (hidden) y solo se revela con sesión válida.
-    // Así /seleccion nunca parpadea contenido protegido.
-    if (!estaAutenticado()) {
+<script is:inline>
+    try {
+        if (sessionStorage.getItem("iria_auth") === "true") {
+            document
+                .querySelector("[data-vista-panel]")
+                ?.removeAttribute("hidden");
+        } else {
+            window.location.replace("/");
+        }
+    } catch {
         window.location.replace("/");
-    } else {
-        document
-            .querySelector("[data-vista-panel]")
-            ?.removeAttribute("hidden");
     }
 
     document.getElementById("boton-regresar")?.addEventListener("click", () => {
-        cerrarSesion();
+        try {
+            sessionStorage.removeItem("iria_auth");
+            sessionStorage.removeItem("iria_user");
+        } catch {}
+        window.dispatchEvent(new CustomEvent("iria:auth-change"));
         window.location.href = "/";
     });
 </script>
