@@ -2,16 +2,33 @@
 ---
 
 <div class="sel-min">
-    <div class="circulos" role="group" aria-label="Opciones de selección">
-        <button type="button" class="circulo circulo-1" data-btn="Btn1">
-            <span>Communicate</span>
-        </button>
-        <button type="button" class="circulo circulo-2" data-btn="Btn2">
-            <span>Connect</span>
-        </button>
-        <button type="button" class="circulo circulo-3" data-btn="Btn3">
-            <span>Create</span>
-        </button>
+    <div class="tarjeta">
+        <div class="circulos" role="group" aria-label="Opciones de selección">
+            <button
+                type="button"
+                class="circulo circulo-communicate"
+                data-btn="Btn1"
+            >
+                <span>Communicate</span>
+            </button>
+            <button
+                type="button"
+                class="circulo circulo-create"
+                data-btn="Btn3"
+            >
+                <span>Create</span>
+            </button>
+            <button
+                type="button"
+                class="circulo circulo-connect"
+                data-btn="Btn2"
+            >
+                <span>Connect</span>
+            </button>
+        </div>
+        <div class="pregunta">
+            <h1>¿En qué te<br />enfocarás hoy?</h1>
+        </div>
     </div>
     <button type="button" id="boton-regresar" class="btn-regresar">
         Regresar
@@ -29,9 +46,6 @@
 
     botones.forEach((boton) => {
         boton.addEventListener("click", () => {
-            botones.forEach((otro) => otro.classList.remove("activo"));
-            boton.classList.add("activo");
-
             const nombre = boton.getAttribute("data-btn") ?? "opción";
             window.dispatchEvent(
                 new CustomEvent("iria:seleccion", { detail: nombre }),
@@ -52,68 +66,178 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        gap: 2rem;
-        background: #f1f5f9;
-        padding: 2rem;
+        gap: 1.5rem;
+        background: #6e0d0d;
+        padding: clamp(1rem, 3vw, 2.5rem);
         box-sizing: border-box;
     }
+
+    .tarjeta {
+        width: min(1120px, 100%);
+        display: grid;
+        grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+        align-items: center;
+        gap: clamp(1.5rem, 3.5vw, 3.5rem);
+        padding: clamp(1.5rem, 4vw, 3.5rem) clamp(1.5rem, 3.5vw, 3.5rem);
+        border-radius: clamp(24px, 3.2vw, 40px);
+        background: #f5efe4;
+        box-sizing: border-box;
+        box-shadow: 0 26px 60px rgba(0, 0, 0, 0.28);
+        container-type: inline-size;
+    }
+
     .circulos {
         position: relative;
-        width: 660px;
-        height: 590px;
+        width: 100%;
+        max-width: 520px;
+        aspect-ratio: 521 / 432;
+        justify-self: center;
+        container-type: inline-size;
     }
+
     .circulo {
         position: absolute;
-        width: 350px;
-        height: 350px;
-        border: 1px solid #cbd5e1;
+        width: 52.7%;
+        aspect-ratio: 1;
+        border: 0;
         border-radius: 50%;
-        background: #fff;
-        color: #0f172a;
-        font-size: 1.25rem;
-        font-weight: 600;
+        padding: 0;
+        display: grid;
+        place-items: center;
+        font-family: inherit;
+        font-size: clamp(1rem, 5.7cqw, 2rem);
+        font-weight: 700;
+        line-height: 1;
+        letter-spacing: -0.02em;
         cursor: pointer;
+        transition:
+            filter 180ms ease,
+            box-shadow 180ms ease;
+    }
+
+    .circulo:active {
+        filter: brightness(0.94);
+    }
+
+    .circulo:focus-visible {
+        outline: 3px solid #6e0d0d;
+        outline-offset: 4px;
+    }
+
+    .circulo span {
+        padding: 0.18em 0.6em;
+        border-radius: 999px;
+        transition:
+            background 180ms ease,
+            color 180ms ease;
+    }
+
+    .circulo:hover {
+        box-shadow: inset 0 0 0 clamp(3px, 1.5cqw, 6px) var(--anillo);
+    }
+
+    .circulo:hover span {
+        background: var(--anillo);
+        color: var(--texto-anillo);
+    }
+
+    /* Al pasar el mouse, los demás se atenúan sin moverse ni cambiar de capa. */
+    .circulos:has(.circulo:hover) .circulo:not(:hover) {
+        filter: saturate(0.55) brightness(0.92);
+    }
+
+    .circulo-communicate {
+        --anillo: #f5efe4;
+        --texto-anillo: #3b2a1a;
+        left: 0;
+        top: 0;
+        z-index: 1;
+        background: #3b2a1a;
+        color: #fff8ef;
+    }
+
+    .circulo-create {
+        --anillo: #6e0d0d;
+        --texto-anillo: #faf4c6;
+        left: 47.4%;
+        top: 3.5%;
+        z-index: 2;
+        background: #faf4c6;
+        color: #6e0d0d;
+    }
+
+    .circulo-connect {
+        --anillo: #3b2a1a;
+        --texto-anillo: #cfe4ec;
+        left: 27.4%;
+        top: 36.8%;
+        z-index: 3;
+        background: #cfe4ec;
+        color: #141414;
+    }
+
+    .pregunta {
         display: grid;
         place-items: center;
     }
-    .circulo:hover {
-        background: #f8fafc;
+
+    .pregunta h1 {
+        margin: 0;
+        color: #0b0b0b;
+        font-size: clamp(2.3rem, 4.8vw, 4.25rem);
+        font-size: clamp(2.25rem, 5.8cqw, 4.1rem);
+        font-weight: 900;
+        line-height: 0.98;
+        letter-spacing: -0.045em;
+        text-align: center;
     }
-    .circulo.activo {
-        background: #0f172a;
-        border-color: #0f172a;
-        color: #fff;
-    }
-    .circulo-1 {
-        left: 0;
-        top: 0;
-    }
-    .circulo-2 {
-        left: 310px;
-        top: 0;
-    }
-    .circulo-3 {
-        left: 155px;
-        top: 240px;
-    }
+
     .btn-regresar {
-        border: none;
-        border-radius: 6px;
-        background: #0f172a;
-        color: #fff;
-        padding: 0.6rem 2rem;
+        border: 1.5px solid rgba(255, 246, 227, 0.55);
+        border-radius: 999px;
+        background: transparent;
+        color: #fff6e3;
+        padding: 0.65rem 2.2rem;
+        font-family: inherit;
+        font-size: 1rem;
+        font-weight: 600;
         cursor: pointer;
+        transition:
+            background 180ms ease,
+            color 180ms ease;
     }
+
     .btn-regresar:hover {
-        background: #1e293b;
+        background: #fff6e3;
+        color: #6e0d0d;
+        border-color: #fff6e3;
     }
-    @media (max-width: 768px) {
-        .sel-min {
-            overflow-x: clip;
+
+    .btn-regresar:focus-visible {
+        outline: 3px solid #fff6e3;
+        outline-offset: 4px;
+    }
+
+    @media (max-width: 860px) {
+        .tarjeta {
+            grid-template-columns: minmax(0, 1fr);
+            gap: 1.75rem;
+            padding: clamp(1.25rem, 5vw, 2.5rem);
         }
+
         .circulos {
-            transform: scale(0.5);
-            transform-origin: center;
+            max-width: 460px;
+        }
+
+        .pregunta h1 {
+            font-size: clamp(2rem, 9vw, 3.25rem);
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .circulo,
+        .btn-regresar {
+            transition: none;
         }
     }
 </style>
