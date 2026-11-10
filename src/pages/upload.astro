@@ -16,9 +16,15 @@ import GuardiaAuth from "../components/GuardiaAuth.astro";
                     + Subir archivos
                 </label>
                 <input id="input-archivos" type="file" multiple hidden />
-                <button type="button" id="boton-volver" class="btn-regresar">
+                <a
+                    href="/ind_3"
+                    id="boton-volver"
+                    class="btn-regresar"
+                    data-astro-prefetch="viewport"
+                    data-cursor-carga
+                >
                     Regresar
-                </button>
+                </a>
             </div>
         </header>
 
@@ -231,7 +237,6 @@ import GuardiaAuth from "../components/GuardiaAuth.astro";
         avisar(`${nuevos.length} archivo(s) subido(s). Solo frontend.`);
     }
 
-    document.getElementById("boton-volver")?.addEventListener("click", () => { window.location.href = "/ind_3"; });
     input?.addEventListener("change", () => { agregar(input.files); input.value = ""; });
 
     ["dragenter", "dragover"].forEach((ev) => zona?.addEventListener(ev, (e) => {
@@ -310,6 +315,8 @@ import GuardiaAuth from "../components/GuardiaAuth.astro";
     .btn-primary:hover { background: #1e293b; }
     .como-boton { display: inline-block; }
     .btn-regresar {
+        display: inline-flex; align-items: center; justify-content: center;
+        box-sizing: border-box; text-decoration: none; font-family: inherit;
         border: 1px solid #cbd5e1; border-radius: 6px; background: #fff; color: #0f172a;
         padding: 0.6rem 1.4rem; font-size: 1rem; font-weight: 600; cursor: pointer; white-space: nowrap;
     }

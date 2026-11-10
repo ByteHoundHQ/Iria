@@ -1,7 +1,7 @@
 {
   "name": "iria",
   "type": "module",
-  "version": "1.0.5",
+  "version": "1.0.7",
   "engines": {
     "node": ">=22.12.0"
   },

@@ -1,0 +1,87 @@
+---
+---
+
+<div id="cursor-carga" class="cursor-carga" aria-hidden="true"></div>
+<span id="estado-carga" class="estado-carga" role="status" aria-live="polite"
+></span>
+
+<script>
+    import { inicializarCursorCarga } from "../lib/cursorCarga";
+
+    inicializarCursorCarga();
+</script>
+
+<style is:global>
+    /* Cursor de carga con la paleta de la página. */
+    .cursor-carga {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 36px;
+        height: 36px;
+        margin: -18px 0 0 -18px;
+        pointer-events: none;
+        z-index: 9999;
+        opacity: 0;
+        transform: translate3d(-100px, -100px, 0);
+        transition: opacity 140ms ease;
+        filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.35));
+        will-change: transform;
+    }
+
+    body.cargando .cursor-carga {
+        opacity: 1;
+    }
+
+    .cursor-carga::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: 50%;
+        border: 3px solid rgba(245, 239, 228, 0.65);
+        border-top-color: #6e0d0d;
+        border-right-color: #6e0d0d;
+        animation: cursor-girar 640ms linear infinite;
+    }
+
+    /* Mientras se carga, ocultamos el puntero nativo y usamos el anillo. */
+    body.cargando,
+    body.cargando * {
+        cursor: none !important;
+    }
+
+    .estado-carga {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        margin: -1px;
+        padding: 0;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        clip-path: inset(50%);
+        white-space: nowrap;
+        border: 0;
+    }
+
+    @keyframes cursor-girar {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    @keyframes cursor-latir {
+        0%,
+        100% {
+            opacity: 1;
+        }
+        50% {
+            opacity: 0.35;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .cursor-carga::before {
+            animation: cursor-latir 1.2s ease-in-out infinite;
+        }
+    }
+</style>

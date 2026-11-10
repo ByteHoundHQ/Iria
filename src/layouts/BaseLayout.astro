@@ -1,4 +1,6 @@
 ---
+import CursorCarga from "../components/CursorCarga.astro";
+
 interface Props {
     title?: string;
     description?: string;
@@ -22,6 +24,7 @@ const {
         <title>{title}</title>
     </head>
     <body>
+        <CursorCarga />
         <slot />
     </body>
 </html>
@@ -42,20 +45,20 @@ const {
         display: none !important;
     }
 
-    /* Transiciones nativas entre documentos (MPA). */
+    /* Transiciones nativas entre documentos (MPA).
+       Sin animación de salida y con una entrada breve: la página nueva
+       aparece de inmediato en lugar de esperar ~400 ms de fundido. */
     @view-transition {
         navigation: auto;
     }
     ::view-transition-old(root) {
-        animation: iria-salir 160ms ease both;
+        animation: none;
+    }
+    ::view-transition-group(root) {
+        animation-duration: 120ms;
     }
     ::view-transition-new(root) {
-        animation: iria-entrar 240ms cubic-bezier(0.22, 1, 0.36, 1) both;
-    }
-    @keyframes iria-salir {
-        to {
-            opacity: 0;
-        }
+        animation: iria-entrar 120ms ease both;
     }
     @keyframes iria-entrar {
         from {
@@ -63,7 +66,7 @@ const {
         }
     }
     @media (prefers-reduced-motion: reduce) {
-        ::view-transition-old(root),
+        ::view-transition-group(root),
         ::view-transition-new(root) {
             animation: none;
         }

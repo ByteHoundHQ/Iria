@@ -25,6 +25,5 @@ import SelectorCirculos from "./SelectorCirculos.astro";
             sessionStorage.removeItem("iria_user");
         } catch {}
         window.dispatchEvent(new CustomEvent("iria:auth-change"));
-        window.location.href = "/";
     });
 </script>

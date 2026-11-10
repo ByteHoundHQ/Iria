@@ -11,9 +11,15 @@ import GuardiaAuth from "../components/GuardiaAuth.astro";
                 <h1>Dashboard</h1>
                 <p>Resumen general · datos de ejemplo</p>
             </div>
-            <button type="button" id="boton-volver" class="btn-regresar">
+            <a
+                href="/ind_2"
+                id="boton-volver"
+                class="btn-regresar"
+                data-astro-prefetch="viewport"
+                data-cursor-carga
+            >
                 Regresar
-            </button>
+            </a>
         </header>
 
         <section class="kpis" aria-label="Indicadores">
@@ -143,12 +149,6 @@ import GuardiaAuth from "../components/GuardiaAuth.astro";
     </main>
 </BaseLayout>
 
-<script>
-    document.getElementById("boton-volver")?.addEventListener("click", () => {
-        window.location.href = "/ind_2";
-    });
-</script>
-
 <style>
     .dash {
         min-height: 100vh;
@@ -182,6 +182,12 @@ import GuardiaAuth from "../components/GuardiaAuth.astro";
         color: #64748b;
     }
     .btn-regresar {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
+        text-decoration: none;
+        font-family: inherit;
         border: none;
         border-radius: 6px;
         background: #0f172a;

@@ -22,9 +22,15 @@ const clientes = [
                 <h1>Clientes</h1>
                 <p>Parrilla de clientes del usuario · datos de ejemplo</p>
             </div>
-            <button type="button" id="boton-volver" class="btn-regresar">
+            <a
+                href="/ind_2"
+                id="boton-volver"
+                class="btn-regresar"
+                data-astro-prefetch="viewport"
+                data-cursor-carga
+            >
                 Regresar
-            </button>
+            </a>
         </header>
 
         <div class="cli-tools">
@@ -86,10 +92,6 @@ const clientes = [
 </BaseLayout>
 
 <script>
-    document.getElementById("boton-volver")?.addEventListener("click", () => {
-        window.location.href = "/ind_2";
-    });
-
     const buscador = document.getElementById(
         "buscador",
     ) as HTMLInputElement | null;
@@ -149,6 +151,12 @@ const clientes = [
         color: #64748b;
     }
     .btn-regresar {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
+        text-decoration: none;
+        font-family: inherit;
         border: none;
         border-radius: 6px;
         background: #0f172a;
