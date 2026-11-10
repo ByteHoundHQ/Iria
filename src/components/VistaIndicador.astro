@@ -9,7 +9,7 @@ interface Props {
     titulo?: string;
     etiquetaBoton?: string;
     opciones?: Opcion[];
-    variante?: "clasico" | "connect" | "create";
+    variante?: "clasico" | "connect" | "create" | "communicate";
 }
 
 const {
@@ -25,7 +25,8 @@ const {
 
 const esConnect = variante === "connect";
 const esCreate = variante === "create";
-const esTarjeta = esConnect || esCreate;
+const esCommunicate = variante === "communicate";
+const esTarjeta = esConnect || esCreate || esCommunicate;
 ---
 
 <section
@@ -34,6 +35,7 @@ const esTarjeta = esConnect || esCreate;
         esTarjeta && "ind--tarjeta",
         esConnect && "ind--connect",
         esCreate && "ind--create",
+        esCommunicate && "ind--communicate",
     ]}
 >
     {
@@ -67,12 +69,6 @@ const esTarjeta = esConnect || esCreate;
                             <>
                                 <path
                                     d="M0 60H65C76 60 85 51 85 40V20C85 9 94 0 105 0H220"
-                                    stroke="#141414"
-                                    stroke-width="2.5"
-                                    vector-effect="non-scaling-stroke"
-                                />
-                                <path
-                                    d="M0 140H220"
                                     stroke="#141414"
                                     stroke-width="2.5"
                                     vector-effect="non-scaling-stroke"
@@ -416,6 +412,16 @@ const esTarjeta = esConnect || esCreate;
     }
     .ind--connect .ind-circle:hover {
         background: #cfe4ec;
+    }
+
+    /* Communicate: círculo café con texto azul claro. */
+    .ind--communicate .ind-circle {
+        background: #452a1b;
+        color: #cfe4ec;
+        font-size: clamp(1.2rem, 2.2vw, 2rem);
+    }
+    .ind--communicate .ind-circle:hover {
+        background: #452a1b;
     }
 
     /* Create: círculo amarillo pálido con texto vino. */
