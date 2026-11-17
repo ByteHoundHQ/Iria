@@ -1,0 +1,2620 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import GuardiaAuth from "../components/GuardiaAuth.astro";
+
+const metricas = [
+    { id: "alcance", nombre: "Alcance" },
+    { id: "interacciones", nombre: "Interacciones" },
+    { id: "seguidores", nombre: "Seguidores" },
+];
+---
+
+<BaseLayout title="Iria — Reportes" description="Iria — Reportes.">
+    <GuardiaAuth />
+    <main class="rep">
+        <header class="rep-top">
+            <h1>Reportes</h1>
+            <div class="rep-acciones">
+                <div class="menu-wrap">
+                    <button
+                        type="button"
+                        class="rep-link"
+                        id="btn-importar"
+                        aria-expanded="false"
+                        aria-controls="menu-importar"
+                    >
+                        Importar
+                    </button>
+                    <div class="menu" id="menu-importar" hidden>
+                        <p>Importar para</p>
+                        <button type="button" data-importar="alcance">Alcance</button>
+                        <button type="button" data-importar="interacciones">
+                            Interacciones
+                        </button>
+                        <button type="button" data-importar="seguidores">
+                            Seguidores
+                        </button>
+                    </div>
+                </div>
+                <a
+                    href="/ind_2"
+                    class="btn-regresar"
+                    data-astro-prefetch="viewport"
+                    data-cursor-carga
+                >
+                    Regresar
+                </a>
+            </div>
+        </header>
+
+        <div class="rep-layout">
+            <aside class="rep-aside" aria-label="Secciones del reporte">
+                <nav class="nav-metricas" aria-label="Métricas y presentación">
+                    {
+                        metricas.map((m) => (
+                            <button type="button" class="nav-item" data-ir={m.id}>
+                                <span>{m.nombre}</span>
+                                <span class="nav-cuenta" data-cuenta={m.id}>
+                                    0
+                                </span>
+                            </button>
+                        ))
+                    }
+                    <hr class="nav-separador" />
+                    <button
+                        type="button"
+                        class="nav-item"
+                        data-ir="presentacion"
+                    >
+                        <span>Presentación</span>
+                        <span class="nav-cuenta" data-cuenta="presentacion">
+                            0
+                        </span>
+                    </button>
+                </nav>
+
+                <p class="aside-nota">
+                    Los datos se guardan en este navegador.
+                </p>
+            </aside>
+
+            <div class="rep-main">
+                {
+                    metricas.map((m) => (
+                        <section
+                            class="vista"
+                            data-vista={m.id}
+                            aria-labelledby={`titulo-${m.id}`}
+                            hidden={m.id !== "alcance"}
+                        >
+                            <header class="vista-cab">
+                                <div>
+                                    <h2 id={`titulo-${m.id}`}>{m.nombre}</h2>
+                                    <p class="vista-sub" data-sub={m.id}>
+                                        Sin datos.
+                                    </p>
+                                </div>
+                                <div class="vista-acciones">
+                                    <button
+                                        type="button"
+                                        class="btn btn-primario"
+                                        data-accion="importar"
+                                        data-metrica={m.id}
+                                    >
+                                        Importar
+                                    </button>
+                                    <button
+                                        type="button"
+                                        class="btn"
+                                        data-accion="manual"
+                                        data-metrica={m.id}
+                                        aria-expanded="false"
+                                        aria-controls={`form-${m.id}`}
+                                    >
+                                        Agregar
+                                    </button>
+                                    <button
+                                        type="button"
+                                        class="btn btn-fantasma"
+                                        data-accion="limpiar"
+                                        data-metrica={m.id}
+                                    >
+                                        Limpiar
+                                    </button>
+                                </div>
+                            </header>
+
+                            <form
+                                class="form-manual"
+                                id={`form-${m.id}`}
+                                data-form={m.id}
+                                hidden
+                            >
+                                <label>
+                                    Fecha
+                                    <input type="date" name="fecha" required />
+                                </label>
+                                <label>
+                                    Valor
+                                    <input
+                                        type="number"
+                                        name="valor"
+                                        min="0"
+                                        step="any"
+                                        inputmode="decimal"
+                                        placeholder="0"
+                                        required
+                                    />
+                                </label>
+                                <button
+                                    type="submit"
+                                    class="btn btn-primario"
+                                >
+                                    Agregar dato
+                                </button>
+                                <button
+                                    type="button"
+                                    class="btn btn-fantasma"
+                                    data-accion="cerrar-manual"
+                                    data-metrica={m.id}
+                                >
+                                    Cancelar
+                                </button>
+                                <p class="form-ayuda">
+                                    CSV o JSON con columnas Fecha y Valor.
+                                </p>
+                            </form>
+
+                            <input
+                                type="file"
+                                accept=".csv,.json,.txt,text/csv,application/json"
+                                hidden
+                                data-file={m.id}
+                            />
+
+                            <article class="panel panel-grafica">
+                                <div class="panel-cab">
+                                    <h3>Evolución</h3>
+                                    <span
+                                        class="panel-nota"
+                                        data-rango={m.id}
+                                    />
+                                </div>
+                                <p class="vacio" data-vacio={m.id}>
+                                    Importa o agrega valores para ver la
+                                    gráfica.
+                                </p>
+                                <div
+                                    class="grafica"
+                                    data-grafica={m.id}
+                                    hidden
+                                />
+                            </article>
+
+                            <article class="panel">
+                                <div class="panel-cab">
+                                    <h3>Datos</h3>
+                                    <span
+                                        class="panel-nota"
+                                        data-conteo={m.id}
+                                    >
+                                        0 registros
+                                    </span>
+                                </div>
+                                <div class="tabla-wrap" hidden>
+                                    <table
+                                        class="tabla-datos"
+                                        data-tabla={m.id}
+                                    >
+                                        <thead>
+                                            <tr>
+                                                <th>Fecha</th>
+                                                <th>Valor</th>
+                                                <th>Cambio</th>
+                                                <th>
+                                                    <span class="sr-only">
+                                                        Acciones
+                                                    </span>
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody />
+                                    </table>
+                                </div>
+                                <p
+                                    class="vacio-tabla"
+                                    data-vacio-tabla={m.id}
+                                >
+                                    Sin registros.
+                                </p>
+                            </article>
+
+                            <article class="panel">
+                                <div class="panel-cab">
+                                    <h3>Fotos</h3>
+                                    <div class="panel-cab-acciones">
+                                        <span
+                                            class="panel-nota"
+                                            data-conteo-fotos={m.id}
+                                        >
+                                            0 fotos
+                                        </span>
+                                        <button
+                                            type="button"
+                                            class="btn btn-primario btn-chico"
+                                            data-accion="fotos"
+                                            data-metrica={m.id}
+                                        >
+                                            Agregar
+                                        </button>
+                                    </div>
+                                </div>
+                                <div
+                                    class="galeria"
+                                    data-galeria={m.id}
+                                />
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    multiple
+                                    hidden
+                                    data-fotos-input={m.id}
+                                />
+                            </article>
+                        </section>
+                    ))
+                }
+
+                <section
+                    class="vista"
+                    data-vista="presentacion"
+                    aria-labelledby="titulo-presentacion"
+                    hidden
+                >
+                    <header class="vista-cab">
+                        <div>
+                            <h2 id="titulo-presentacion">Presentación</h2>
+                        </div>
+                        <div class="vista-acciones">
+                            <button
+                                type="button"
+                                class="btn"
+                                data-accion="exportar"
+                            >
+                                Exportar
+                            </button>
+                            <button
+                                type="button"
+                                class="btn btn-primario"
+                                data-accion="imprimir"
+                            >
+                                Imprimir
+                            </button>
+                        </div>
+                    </header>
+
+                    <div class="pres-doc" data-presentacion>
+                        <header class="pres-portada">
+                            <h2>Reportes</h2>
+                            <p class="pres-fecha" data-pres-fecha></p>
+                        </header>
+
+                        {
+                            metricas.map((m) => (
+                                <article
+                                    class="pres-bloque"
+                                    data-pres-bloque={m.id}
+                                    hidden
+                                >
+                                    <header class="pres-bloque-cab">
+                                        <h3>{m.nombre}</h3>
+                                        <span
+                                            class="pres-rango"
+                                            data-pres-rango={m.id}
+                                        />
+                                    </header>
+                                    <div
+                                        class="pres-kpis"
+                                        data-pres-kpis={m.id}
+                                    />
+                                    <div
+                                        class="grafica"
+                                        data-pres-grafica={m.id}
+                                        hidden
+                                    />
+                                    <div
+                                        class="tabla-wrap"
+                                        data-pres-tabla-wrap={m.id}
+                                    >
+                                        <table
+                                            class="tabla-datos"
+                                            data-pres-tabla={m.id}
+                                        >
+                                            <thead>
+                                                <tr>
+                                                    <th>Fecha</th>
+                                                    <th>Valor</th>
+                                                    <th>Cambio</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody />
+                                        </table>
+                                    </div>
+                                    <p
+                                        class="pres-subtitulo"
+                                        data-pres-fotos-label={m.id}
+                                        hidden
+                                    >
+                                        Capturas
+                                    </p>
+                                    <div
+                                        class="galeria galeria--pres"
+                                        data-pres-galeria={m.id}
+                                    />
+                                </article>
+                            ))
+                        }
+                        <p class="vacio" data-pres-vacio>
+                            Agrega datos o fotos para armar la presentación.
+                        </p>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <div id="rep-toast" class="rep-toast" role="status" aria-live="polite"></div>
+
+    <div
+        id="lightbox"
+        class="lightbox"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Vista previa de imagen"
+        hidden
+    >
+        <button
+            type="button"
+            class="lightbox-cerrar"
+            aria-label="Cerrar vista previa"
+        >
+            ×
+        </button>
+        <figure>
+            <img id="lightbox-img" alt="" />
+            <figcaption id="lightbox-caption"></figcaption>
+        </figure>
+    </div>
+</BaseLayout>
+
+<style is:global>
+    .rep {
+        --tinta: #1f262e;
+        --tinta-suave: #5f6b78;
+        --linea: #39424c;
+        --linea-tenue: #d5dbe1;
+        --acento: #2c6076;
+        --acento-suave: #d9e9f0;
+        --papel: rgba(255, 255, 255, 0.74);
+        min-height: 100vh;
+        box-sizing: border-box;
+        padding: clamp(1rem, 2.2vw, 1.8rem);
+        background-color: #f5f6f4;
+        background-image: radial-gradient(
+            #d4dae0 1.2px,
+            transparent 1.2px
+        );
+        background-size: 20px 20px;
+        color: var(--tinta);
+    }
+    .rep h1,
+    .rep h2,
+    .rep h3,
+    .rep p {
+        overflow-wrap: anywhere;
+    }
+    .rep :where(button, a, input):focus-visible {
+        outline: 2px solid var(--acento);
+        outline-offset: 3px;
+    }
+    .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        margin: -1px;
+        padding: 0;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        clip-path: inset(50%);
+        white-space: nowrap;
+        border: 0;
+    }
+
+    /* ---------- Encabezado ---------- */
+    .rep-top {
+        max-width: 1500px;
+        margin: 0 auto clamp(1rem, 2vw, 1.4rem);
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        gap: 1rem;
+        flex-wrap: wrap;
+        padding: 0 0.35rem;
+    }
+    .rep-top h1 {
+        margin: 0;
+        font-size: clamp(1.7rem, 2.8vw, 2.2rem);
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        line-height: 1.1;
+    }
+    .rep-acciones {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+    .rep-link {
+        border: 0;
+        background: none;
+        font: inherit;
+        font-size: 0.95rem;
+        color: var(--tinta-suave);
+        text-decoration: underline;
+        text-underline-offset: 4px;
+        cursor: pointer;
+        padding: 0.4rem 0.2rem;
+    }
+    .rep-link:hover {
+        color: var(--tinta);
+    }
+    .btn-regresar {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
+        text-decoration: none;
+        font-family: inherit;
+        font-size: 1.02rem;
+        color: var(--tinta);
+        border: 1.5px solid var(--linea);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.66);
+        padding: 0.72rem 2.2rem;
+        cursor: pointer;
+        white-space: nowrap;
+        transition:
+            background 160ms ease,
+            transform 160ms ease;
+    }
+    .btn-regresar:hover {
+        background: #fff;
+    }
+    .btn-regresar:active {
+        transform: translateY(1px);
+    }
+    .menu-wrap {
+        position: relative;
+    }
+    .menu {
+        position: absolute;
+        right: 0;
+        top: calc(100% + 0.5rem);
+        z-index: 30;
+        min-width: 220px;
+        background: #fff;
+        border: 1.5px solid var(--linea);
+        border-radius: 18px;
+        padding: 0.5rem;
+        box-shadow: 0 18px 40px rgba(23, 30, 38, 0.14);
+    }
+    .menu p {
+        margin: 0.2rem 0.6rem 0.5rem;
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.09em;
+        color: var(--tinta-suave);
+    }
+    .menu button {
+        display: block;
+        width: 100%;
+        text-align: left;
+        border: 0;
+        background: transparent;
+        font: inherit;
+        font-size: 0.95rem;
+        color: var(--tinta);
+        padding: 0.55rem 0.6rem;
+        border-radius: 10px;
+        cursor: pointer;
+    }
+    .menu button:hover {
+        background: var(--acento-suave);
+    }
+
+    /* ---------- Estructura ---------- */
+    .rep-layout {
+        max-width: 1500px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: minmax(230px, 290px) minmax(0, 1fr);
+        gap: clamp(1rem, 2vw, 1.6rem);
+        align-items: start;
+    }
+    .rep-main {
+        display: flex;
+        flex-direction: column;
+        gap: clamp(1rem, 2vw, 1.5rem);
+        min-width: 0;
+    }
+    .vista {
+        display: flex;
+        flex-direction: column;
+        gap: clamp(1rem, 2vw, 1.5rem);
+        animation: rep-aparecer 220ms ease both;
+    }
+    @keyframes rep-aparecer {
+        from {
+            opacity: 0;
+            transform: translateY(4px);
+        }
+    }
+    .vista-cab {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        gap: 1rem;
+        flex-wrap: wrap;
+        padding: 0.2rem 0.35rem;
+    }
+    .vista-cab h2 {
+        margin: 0;
+        font-size: clamp(1.35rem, 2.2vw, 1.8rem);
+        font-weight: 600;
+        letter-spacing: -0.01em;
+    }
+    .vista-sub {
+        margin: 0.35rem 0 0;
+        color: var(--tinta-suave);
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+    .vista-acciones {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    /* ---------- Botones ---------- */
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+        font: inherit;
+        font-size: 0.88rem;
+        font-weight: 500;
+        padding: 0.55rem 1.05rem;
+        border-radius: 999px;
+        border: 1px solid var(--linea);
+        background: rgba(255, 255, 255, 0.65);
+        color: var(--tinta);
+        cursor: pointer;
+        text-decoration: none;
+        white-space: nowrap;
+        transition:
+            background 150ms ease,
+            transform 150ms ease,
+            border-color 150ms ease;
+    }
+    .btn:hover {
+        background: #fff;
+    }
+    .btn:active {
+        transform: translateY(1px);
+    }
+    .btn-primario {
+        background: var(--tinta);
+        border-color: var(--tinta);
+        color: #fff;
+    }
+    .btn-primario:hover {
+        background: #38424d;
+    }
+    .btn-fantasma {
+        background: transparent;
+        border-color: var(--linea-tenue);
+        color: var(--tinta-suave);
+    }
+    .btn-fantasma:hover {
+        background: transparent;
+        border-color: var(--linea);
+        color: var(--tinta);
+    }
+    .btn-chico {
+        padding: 0.35rem 0.85rem;
+        font-size: 0.78rem;
+    }
+
+    /* ---------- Panel lateral ---------- */
+    .rep-aside {
+        position: sticky;
+        top: 1.2rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+        border: 1.5px solid var(--linea);
+        border-radius: 30px;
+        background: rgba(255, 255, 255, 0.56);
+        backdrop-filter: blur(4px);
+        padding: 1.6rem 1.15rem 1.4rem;
+    }
+    .nav-metricas {
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+    }
+    .nav-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.6rem;
+        width: 100%;
+        border: 0;
+        background: transparent;
+        font: inherit;
+        font-size: 1rem;
+        color: var(--tinta);
+        padding: 0.62rem 0.8rem;
+        border-radius: 999px;
+        cursor: pointer;
+        text-align: left;
+        transition:
+            background 150ms ease,
+            color 150ms ease;
+    }
+    .nav-item:hover {
+        background: rgba(255, 255, 255, 0.85);
+    }
+    .nav-item[aria-current="true"] {
+        background: var(--acento-suave);
+        font-weight: 600;
+    }
+    .nav-cuenta {
+        flex: 0 0 auto;
+        min-width: 1.55rem;
+        padding: 0.1rem 0.4rem;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.9);
+        color: var(--tinta-suave);
+        font-size: 0.72rem;
+        font-weight: 600;
+        text-align: center;
+        font-variant-numeric: tabular-nums;
+    }
+    .nav-item[aria-current="true"] .nav-cuenta {
+        color: var(--acento);
+    }
+    .nav-separador {
+        height: 1px;
+        border: 0;
+        background: var(--linea-tenue);
+        margin: 0.55rem 0.3rem;
+    }
+    .aside-nota {
+        margin: auto 0 0;
+        padding-top: 1rem;
+        border-top: 1px dashed var(--linea-tenue);
+        font-size: 0.74rem;
+        line-height: 1.55;
+        color: var(--tinta-suave);
+    }
+
+    /* ---------- Paneles ---------- */
+    .panel {
+        border: 1.5px solid var(--linea);
+        border-radius: clamp(22px, 2.4vw, 30px);
+        background: var(--papel);
+        padding: clamp(1.1rem, 1.8vw, 1.6rem);
+    }
+    .panel-cab {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-bottom: 0.9rem;
+    }
+    .panel-cab h3 {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 600;
+    }
+    .panel-cab-acciones {
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+        flex-wrap: wrap;
+    }
+    .panel-nota {
+        font-size: 0.78rem;
+        color: var(--tinta-suave);
+        font-variant-numeric: tabular-nums;
+    }
+    .panel-grafica {
+        padding-bottom: clamp(1rem, 1.8vw, 1.5rem);
+    }
+    .vacio {
+        margin: 0;
+        padding: clamp(1.6rem, 4vw, 3rem) 1rem;
+        text-align: center;
+        color: var(--tinta-suave);
+        font-size: 0.92rem;
+        line-height: 1.6;
+        border: 1px dashed var(--linea-tenue);
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.4);
+    }
+    .vacio-tabla {
+        margin: 0.4rem 0 0;
+        font-size: 0.85rem;
+        color: var(--tinta-suave);
+    }
+
+    /* ---------- Gráfica ---------- */
+    .grafica {
+        width: 100%;
+        margin-top: 0.2rem;
+    }
+    .grafica svg {
+        display: block;
+        width: 100%;
+        height: auto;
+        overflow: visible;
+    }
+    .grafica text {
+        font-family: inherit;
+    }
+
+    /* ---------- Tabla ---------- */
+    .tabla-wrap {
+        overflow-x: auto;
+        border-radius: 14px;
+    }
+    .tabla-datos {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.9rem;
+    }
+    .tabla-datos th {
+        text-align: left;
+        padding: 0.55rem 0.6rem;
+        border-bottom: 1px solid var(--linea-tenue);
+        color: var(--tinta-suave);
+        font-size: 0.7rem;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+    .tabla-datos td {
+        padding: 0.62rem 0.6rem;
+        border-bottom: 1px solid rgba(213, 219, 225, 0.7);
+        color: var(--tinta);
+        white-space: nowrap;
+    }
+    .tabla-datos tbody tr:last-child td {
+        border-bottom: 0;
+    }
+    .tabla-datos .num {
+        font-weight: 600;
+        font-variant-numeric: tabular-nums;
+    }
+    .cambio {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--tinta-suave);
+        font-variant-numeric: tabular-nums;
+    }
+    .cambio.sube {
+        color: #1a7f4b;
+    }
+    .cambio.baja {
+        color: #b4443b;
+    }
+    .btn-eliminar {
+        border: 0;
+        background: transparent;
+        color: var(--tinta-suave);
+        font: inherit;
+        font-size: 0.78rem;
+        padding: 0.25rem 0.45rem;
+        border-radius: 7px;
+        cursor: pointer;
+    }
+    .btn-eliminar:hover {
+        color: #b4443b;
+        background: rgba(180, 68, 59, 0.08);
+    }
+
+    /* ---------- Formulario manual ---------- */
+    .form-manual {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-end;
+        gap: 0.75rem;
+        padding: 1rem 1.1rem;
+        border: 1.5px dashed var(--linea);
+        border-radius: 22px;
+        background: rgba(255, 255, 255, 0.55);
+    }
+    .form-manual label {
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+        font-size: 0.72rem;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--tinta-suave);
+    }
+    .form-manual input {
+        font: inherit;
+        font-size: 0.95rem;
+        font-weight: 400;
+        letter-spacing: normal;
+        text-transform: none;
+        color: var(--tinta);
+        background: #fff;
+        border: 1px solid var(--linea-tenue);
+        border-radius: 10px;
+        padding: 0.5rem 0.7rem;
+    }
+    .form-manual input[type="number"] {
+        width: 9.5rem;
+    }
+    .form-ayuda {
+        flex-basis: 100%;
+        margin: 0;
+        font-size: 0.76rem;
+        font-weight: 400;
+        letter-spacing: normal;
+        text-transform: none;
+        line-height: 1.5;
+        color: var(--tinta-suave);
+    }
+
+    /* ---------- Galería ---------- */
+    .galeria {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
+        gap: 0.75rem;
+    }
+    .foto {
+        position: relative;
+        margin: 0;
+        aspect-ratio: 1;
+        border: 1.5px solid var(--linea);
+        border-radius: 20px;
+        overflow: hidden;
+        background: #fff;
+    }
+    .foto-abrir {
+        display: block;
+        width: 100%;
+        height: 100%;
+        padding: 0;
+        border: 0;
+        background: #fff;
+        cursor: zoom-in;
+    }
+    .foto img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .foto-eliminar {
+        position: absolute;
+        top: 0.35rem;
+        right: 0.35rem;
+        width: 1.7rem;
+        height: 1.7rem;
+        display: grid;
+        place-items: center;
+        border: 0;
+        border-radius: 50%;
+        background: rgba(20, 25, 30, 0.74);
+        color: #fff;
+        font-size: 1rem;
+        line-height: 1;
+        cursor: pointer;
+        opacity: 0;
+        transition: opacity 150ms ease;
+    }
+    .foto:hover .foto-eliminar,
+    .foto-eliminar:focus-visible {
+        opacity: 1;
+    }
+    .foto-agregar {
+        aspect-ratio: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.15rem;
+        border: 1.5px dashed var(--linea);
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.4);
+        color: var(--tinta-suave);
+        font: inherit;
+        font-size: 0.78rem;
+        cursor: pointer;
+        transition:
+            background 150ms ease,
+            color 150ms ease;
+    }
+    .foto-agregar strong {
+        font-size: 1.5rem;
+        font-weight: 300;
+        line-height: 1;
+    }
+    .foto-agregar:hover {
+        background: #fff;
+        color: var(--tinta);
+    }
+    .galeria--pres .foto {
+        border-radius: 14px;
+    }
+
+    /* ---------- Presentación ---------- */
+    .pres-doc {
+        display: flex;
+        flex-direction: column;
+        gap: 1.8rem;
+        border: 1.5px solid var(--linea);
+        border-radius: clamp(22px, 2.4vw, 30px);
+        background: rgba(255, 255, 255, 0.84);
+        padding: clamp(1.25rem, 3vw, 2.6rem);
+    }
+    .pres-portada {
+        padding-bottom: 1.4rem;
+        border-bottom: 1.5px solid var(--linea-tenue);
+    }
+    .pres-portada h2 {
+        margin: 0.15rem 0 0.45rem;
+        font-size: clamp(1.8rem, 3vw, 2.4rem);
+        font-weight: 600;
+        line-height: 1.1;
+    }
+    .pres-fecha {
+        margin: 0;
+        font-size: 0.86rem;
+        color: var(--tinta-suave);
+    }
+    .pres-bloque {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--linea-tenue);
+    }
+    .pres-bloque:first-of-type {
+        padding-top: 0;
+        border-top: 0;
+    }
+    .pres-bloque-cab {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+    .pres-bloque-cab h3 {
+        margin: 0;
+        font-size: 1.2rem;
+        font-weight: 600;
+    }
+    .pres-rango {
+        font-size: 0.78rem;
+        color: var(--tinta-suave);
+    }
+    .pres-subtitulo {
+        margin: 0.15rem 0 0;
+        font-size: 0.68rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--tinta-suave);
+    }
+    .pres-kpis {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(125px, 1fr));
+        gap: 0.7rem;
+    }
+    .pres-kpi {
+        border: 1px solid var(--linea-tenue);
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.78);
+        padding: 0.7rem 0.85rem;
+    }
+    .pres-kpi span {
+        display: block;
+        font-size: 0.66rem;
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+        color: var(--tinta-suave);
+    }
+    .pres-kpi strong {
+        display: block;
+        margin-top: 0.25rem;
+        font-size: 1.08rem;
+        font-weight: 600;
+        font-variant-numeric: tabular-nums;
+    }
+    .pres-kpi strong.sube {
+        color: #1a7f4b;
+    }
+    .pres-kpi strong.baja {
+        color: #b4443b;
+    }
+
+    /* ---------- Lightbox ---------- */
+    .lightbox {
+        position: fixed;
+        inset: 0;
+        z-index: 70;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.8rem;
+        padding: clamp(1rem, 4vw, 3rem);
+        background: rgba(16, 22, 28, 0.88);
+    }
+    .lightbox figure {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.6rem;
+        max-width: 100%;
+        max-height: 100%;
+        margin: 0;
+    }
+    .lightbox img {
+        display: block;
+        max-width: min(1000px, 92vw);
+        max-height: 78vh;
+        border-radius: 12px;
+        background: #fff;
+        box-shadow: 0 20px 70px rgba(0, 0, 0, 0.5);
+    }
+    .lightbox figcaption {
+        color: #e8edf2;
+        font-size: 0.85rem;
+        text-align: center;
+    }
+    .lightbox-cerrar {
+        position: absolute;
+        top: 1.1rem;
+        right: 1.1rem;
+        width: 2.6rem;
+        height: 2.6rem;
+        display: grid;
+        place-items: center;
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.1);
+        color: #fff;
+        font-size: 1.4rem;
+        cursor: pointer;
+    }
+
+    /* ---------- Aviso ---------- */
+    .rep-toast {
+        position: fixed;
+        left: 50%;
+        bottom: 1.5rem;
+        z-index: 80;
+        max-width: min(90vw, 520px);
+        padding: 0.65rem 1.15rem;
+        border-radius: 999px;
+        background: #1f262e;
+        color: #fff;
+        font-size: 0.85rem;
+        text-align: center;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+        opacity: 0;
+        transform: translate(-50%, 0.8rem);
+        pointer-events: none;
+        transition:
+            opacity 200ms ease,
+            transform 200ms ease;
+    }
+    .rep-toast.visible {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+
+    /* ---------- Adaptación ---------- */
+    @media (max-width: 900px) {
+        .rep-layout {
+            grid-template-columns: minmax(0, 1fr);
+        }
+        .rep-aside {
+            position: static;
+        }
+        .nav-metricas {
+            flex-direction: row;
+            flex-wrap: wrap;
+        }
+        .nav-item {
+            width: auto;
+            flex: 1 1 auto;
+            justify-content: center;
+        }
+        .nav-separador {
+            display: none;
+        }
+        .aside-nota {
+            display: none;
+        }
+    }
+    @media (hover: none) {
+        .foto-eliminar {
+            opacity: 1;
+        }
+    }
+    @media (max-width: 620px) {
+        .rep {
+            padding: 0.9rem;
+        }
+        .rep-top {
+            align-items: flex-start;
+        }
+        .vista-cab {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .vista-acciones {
+            width: 100%;
+        }
+        .vista-acciones .btn {
+            flex: 1 1 auto;
+        }
+        .galeria {
+            grid-template-columns: repeat(auto-fill, minmax(94px, 1fr));
+        }
+        .tabla-datos th,
+        .tabla-datos td {
+            padding: 0.5rem 0.45rem;
+        }
+        .form-manual {
+            align-items: stretch;
+        }
+        .form-manual label,
+        .form-manual input[type="number"] {
+            width: 100%;
+        }
+        .pres-kpis {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .vista {
+            animation: none;
+        }
+        .btn-regresar,
+        .btn {
+            transition: none;
+        }
+    }
+
+    /* ---------- Impresión ---------- */
+    @media print {
+        @page {
+            margin: 14mm;
+        }
+        body {
+            background: #fff;
+        }
+        .rep {
+            min-height: 0;
+            padding: 0;
+            background: #fff;
+        }
+        .rep-top,
+        .rep-aside,
+        .vista-acciones,
+        .form-manual,
+        .btn,
+        .foto-agregar,
+        .foto-eliminar,
+        .lightbox,
+        .rep-toast,
+        .menu {
+            display: none !important;
+        }
+        .rep-layout {
+            display: block;
+            max-width: none;
+        }
+        [data-vista]:not([data-vista="presentacion"]) {
+            display: none !important;
+        }
+        .vista {
+            animation: none;
+            gap: 0.8rem;
+        }
+        .pres-doc {
+            gap: 1.1rem;
+            border: 0;
+            border-radius: 0;
+            background: #fff;
+            padding: 0;
+        }
+        .pres-bloque {
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+        .pres-kpi,
+        .tabla-wrap,
+        .galeria {
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+        .grafica svg {
+            max-height: none;
+        }
+        .panel {
+            border-color: #c3c9cf;
+            background: #fff;
+        }
+        .foto {
+            border-color: #c3c9cf;
+        }
+    }
+</style>
+<script>
+    const CLAVE = "iria_reportes_meta_v1";
+    const IDS = ["alcance", "interacciones", "seguidores"];
+    const NOMBRES = {
+        alcance: "Alcance",
+        interacciones: "Interacciones",
+        seguidores: "Seguidores",
+    };
+    const MAX_FOTOS = 10;
+    let estado = cargarEstado();
+    let temporizadorToast = 0;
+
+    function estadoInicial() {
+        return {
+            alcance: { filas: [], fotos: [] },
+            interacciones: { filas: [], fotos: [] },
+            seguidores: { filas: [], fotos: [] },
+        };
+    }
+
+    function normalizarEstado(bruto) {
+        const base = estadoInicial();
+        if (!bruto || typeof bruto !== "object") return base;
+        for (const id of IDS) {
+            const seccion = bruto[id];
+            if (!seccion || typeof seccion !== "object") continue;
+            if (Array.isArray(seccion.filas)) {
+                base[id].filas = seccion.filas
+                    .filter(
+                        (fila) =>
+                            fila &&
+                            fila.fecha != null &&
+                            Number.isFinite(Number(fila.valor)),
+                    )
+                    .map((fila) => ({
+                        fecha: String(fila.fecha),
+                        valor: Number(fila.valor),
+                    }));
+            }
+            if (Array.isArray(seccion.fotos)) {
+                base[id].fotos = seccion.fotos
+                    .filter((foto) => foto && typeof foto.src === "string")
+                    .map((foto) => ({
+                        src: foto.src,
+                        nombre: String(foto.nombre || "Captura"),
+                    }));
+            }
+        }
+        return base;
+    }
+
+    function cargarEstado() {
+        try {
+            const crudo = localStorage.getItem(CLAVE);
+            if (!crudo) return estadoInicial();
+            return normalizarEstado(JSON.parse(crudo));
+        } catch {
+            return estadoInicial();
+        }
+    }
+
+    function guardarEstado() {
+        try {
+            localStorage.setItem(CLAVE, JSON.stringify(estado));
+            return true;
+        } catch {
+            toast("Sin espacio para guardar todo. Elimina algunas fotos.");
+            return false;
+        }
+    }
+
+    function toast(mensaje) {
+        const aviso = document.getElementById("rep-toast");
+        if (!aviso) return;
+        aviso.textContent = mensaje;
+        aviso.classList.add("visible");
+        window.clearTimeout(temporizadorToast);
+        temporizadorToast = window.setTimeout(
+            () => aviso.classList.remove("visible"),
+            3400,
+        );
+    }
+
+    /* ---------- Utilidades de formato ---------- */
+    const fmtNumero = new Intl.NumberFormat("es-MX", {
+        maximumFractionDigits: 2,
+    });
+    const fmtCompacto = new Intl.NumberFormat("es-MX", {
+        notation: "compact",
+        maximumFractionDigits: 1,
+    });
+
+    function fmtNum(valor) {
+        return fmtNumero.format(Number(valor));
+    }
+
+    function fechaISO(anio, mes, dia) {
+        const a = String(anio).padStart(4, "0");
+        const m = String(mes).padStart(2, "0");
+        const d = String(dia).padStart(2, "0");
+        const prueba = new Date(Number(a), Number(m) - 1, Number(d));
+        if (
+            prueba.getFullYear() !== Number(a) ||
+            prueba.getMonth() !== Number(m) - 1 ||
+            prueba.getDate() !== Number(d)
+        ) {
+            return "";
+        }
+        return `${a}-${m}-${d}`;
+    }
+
+    function hoyISO() {
+        const hoy = new Date();
+        return fechaISO(
+            hoy.getFullYear(),
+            hoy.getMonth() + 1,
+            hoy.getDate(),
+        );
+    }
+
+    function parseFecha(valor) {
+        const texto = String(valor ?? "").trim();
+        if (!texto) return "";
+        let coincidencia = texto.match(/^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})/);
+        if (coincidencia) {
+            return fechaISO(
+                coincidencia[1],
+                coincidencia[2],
+                coincidencia[3],
+            );
+        }
+        coincidencia = texto.match(/^(\d{1,2})[-/.](\d{1,2})[-/.](\d{2,4})/);
+        if (coincidencia) {
+            const uno = Number(coincidencia[1]);
+            const dos = Number(coincidencia[2]);
+            let anio = Number(coincidencia[3]);
+            if (anio < 100) anio += 2000;
+            let dia = uno;
+            let mes = dos;
+            if (uno > 12 && dos <= 12) {
+                dia = uno;
+                mes = dos;
+            } else if (dos > 12 && uno <= 12) {
+                dia = dos;
+                mes = uno;
+            }
+            return fechaISO(anio, mes, dia);
+        }
+        const fecha = new Date(texto);
+        if (!Number.isNaN(fecha.getTime())) {
+            return fechaISO(
+                fecha.getFullYear(),
+                fecha.getMonth() + 1,
+                fecha.getDate(),
+            );
+        }
+        return texto;
+    }
+
+    function aFecha(valor) {
+        const coincidencia = String(valor ?? "").match(
+            /^(\d{4})-(\d{2})-(\d{2})$/,
+        );
+        if (!coincidencia) return null;
+        return new Date(
+            Number(coincidencia[1]),
+            Number(coincidencia[2]) - 1,
+            Number(coincidencia[3]),
+        );
+    }
+
+    function fmtFechaCorta(fecha, opciones) {
+        const valor = aFecha(fecha);
+        if (!valor) return String(fecha);
+        return valor.toLocaleDateString(
+            "es-MX",
+            opciones || { day: "2-digit", month: "short" },
+        );
+    }
+
+    function fmtFechaTitulo(fecha) {
+        const valor = aFecha(fecha);
+        if (!valor) return String(fecha);
+        return valor.toLocaleDateString("es-MX", {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+        });
+    }
+
+    function parseNumero(valor) {
+        if (typeof valor === "number") {
+            return Number.isFinite(valor) ? valor : NaN;
+        }
+        let texto = String(valor ?? "")
+            .trim()
+            .replace(/\s/g, "")
+            .replace(/%/g, "");
+        if (!texto) return NaN;
+        if (/^-?\d{1,3}(,\d{3})+$/.test(texto)) {
+            texto = texto.replace(/,/g, "");
+        } else if (/^-?\d{1,3}(\.\d{3})+$/.test(texto)) {
+            texto = texto.replace(/\./g, "");
+        }
+        const coma = texto.lastIndexOf(",");
+        const punto = texto.lastIndexOf(".");
+        if (coma > punto) {
+            texto = texto.replace(/\./g, "").replace(/,/g, ".");
+        } else {
+            texto = texto.replace(/,/g, "");
+        }
+        const numero = Number(texto);
+        return Number.isFinite(numero) ? numero : NaN;
+    }
+
+    function normalizarTexto(valor) {
+        return String(valor ?? "")
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .toLowerCase()
+            .trim();
+    }
+
+    function escaparHtml(valor) {
+        const mapa = {
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&#39;",
+        };
+        return String(valor).replace(/[&<>"']/g, (c) => mapa[c]);
+    }
+
+    function tiempoFila(fecha) {
+        const valor = aFecha(fecha);
+        return valor ? valor.getTime() : Number.POSITIVE_INFINITY;
+    }
+
+    function ordenarFilas(filas) {
+        return [...filas].sort((a, b) => {
+            const ta = tiempoFila(a.fecha);
+            const tb = tiempoFila(b.fecha);
+            if (ta === tb) return 0;
+            return ta - tb;
+        });
+    }
+
+    /* ---------- Lectura de archivos CSV / JSON ---------- */
+    function detectarDelimitador(texto) {
+        const primera =
+            texto.split(/\r?\n/).find((linea) => linea.trim()) || "";
+        const candidatos = [
+            [",", (primera.match(/,/g) || []).length],
+            [";", (primera.match(/;/g) || []).length],
+            ["\t", (primera.match(/\t/g) || []).length],
+        ];
+        candidatos.sort((a, b) => b[1] - a[1]);
+        return candidatos[0][1] > 0 ? candidatos[0][0] : ",";
+    }
+
+    function parsearCSV(texto) {
+        const delimitador = detectarDelimitador(texto);
+        const filas = [];
+        let campo = "";
+        let fila = [];
+        let enComillas = false;
+        for (let i = 0; i < texto.length; i++) {
+            const caracter = texto[i];
+            if (enComillas) {
+                if (caracter === '"') {
+                    if (texto[i + 1] === '"') {
+                        campo += '"';
+                        i++;
+                    } else {
+                        enComillas = false;
+                    }
+                } else {
+                    campo += caracter;
+                }
+            } else if (caracter === '"') {
+                enComillas = true;
+            } else if (caracter === delimitador) {
+                fila.push(campo);
+                campo = "";
+            } else if (caracter === "\n") {
+                fila.push(campo);
+                campo = "";
+                if (fila.some((celda) => String(celda).trim() !== "")) {
+                    filas.push(fila);
+                }
+                fila = [];
+            } else if (caracter === "\r") {
+                continue;
+            } else {
+                campo += caracter;
+            }
+        }
+        if (campo !== "" || fila.length) {
+            fila.push(campo);
+            if (fila.some((celda) => String(celda).trim() !== "")) {
+                filas.push(fila);
+            }
+        }
+        return filas;
+    }
+
+    function indiceFecha(celdas) {
+        return celdas.findIndex((celda) =>
+            /(fecha|date|dia|periodo|mes|day|semana)/.test(celda),
+        );
+    }
+
+    function indiceValor(celdas, metrica) {
+        const patrones = {
+            alcance: /(alcance|reach)/,
+            interacciones: /(interaccion|interaction|engagement)/,
+            seguidores: /(seguidor|follower)/,
+        };
+        return celdas.findIndex((celda) => patrones[metrica].test(celda));
+    }
+
+    function detectarColumnas(matriz) {
+        const columnas = Math.max(...matriz.map((fila) => fila.length));
+        let colFecha = -1;
+        let colValor = -1;
+        for (let c = 0; c < columnas; c++) {
+            const valores = matriz
+                .slice(0, 24)
+                .map((fila) => fila[c])
+                .filter((valor) => valor != null && String(valor).trim() !== "");
+            if (!valores.length) continue;
+            const fechas = valores.filter((valor) => {
+                const texto = String(valor).trim();
+                return (
+                    /^\d{4}[-/.]\d{1,2}[-/.]\d{1,2}/.test(texto) ||
+                    /^\d{1,2}[-/.]\d{1,2}[-/.]\d{2,4}/.test(texto)
+                );
+            }).length;
+            const numeros = valores.filter((valor) =>
+                Number.isFinite(parseNumero(valor)),
+            ).length;
+            if (fechas >= valores.length * 0.6 && fechas > 0) {
+                if (colFecha === -1) colFecha = c;
+            } else if (
+                numeros >= valores.length * 0.6 &&
+                numeros > 0 &&
+                c !== colFecha &&
+                colValor === -1
+            ) {
+                colValor = c;
+            }
+        }
+        if (colFecha === -1) colFecha = 0;
+        if (colValor === -1) colValor = colFecha === 0 ? 1 : 0;
+        return { colFecha, colValor };
+    }
+
+    function filasDesdeCSV(texto, metrica) {
+        const matriz = parsearCSV(texto).filter((fila) =>
+            fila.some((celda) => String(celda).trim() !== ""),
+        );
+        if (!matriz.length) return [];
+        let cabecera = -1;
+        let colFecha = -1;
+        let colValor = -1;
+        let respaldo = -1;
+        for (let i = 0; i < Math.min(matriz.length, 12); i++) {
+            const celdas = matriz[i].map(normalizarTexto);
+            const fecha = indiceFecha(celdas);
+            const valor = indiceValor(celdas, metrica);
+            if (fecha !== -1 && valor !== -1) {
+                cabecera = i;
+                colFecha = fecha;
+                colValor = valor;
+                break;
+            }
+            if (fecha !== -1 && respaldo === -1) {
+                respaldo = i;
+                colFecha = fecha;
+            }
+        }
+        if (cabecera === -1) cabecera = respaldo;
+
+        let datos;
+        if (cabecera === -1) {
+            datos = matriz;
+            const detectadas = detectarColumnas(matriz);
+            colFecha = detectadas.colFecha;
+            colValor = detectadas.colValor;
+        } else {
+            datos = matriz.slice(cabecera + 1);
+            if (colValor === -1) {
+                colValor = matriz[cabecera].findIndex(
+                    (celda, indice) =>
+                        indice !== colFecha &&
+                        /(valor|value|total|resultado|metric|cantidad|count|number)/.test(
+                            normalizarTexto(celda),
+                        ),
+                );
+                if (colValor === -1) {
+                    colValor = colFecha === 0 ? 1 : 0;
+                }
+            }
+        }
+
+        const filas = [];
+        datos.forEach((celdas, indice) => {
+            const fecha = parseFecha(celdas[colFecha] ?? "");
+            const valor = parseNumero(celdas[colValor] ?? "");
+            if (!Number.isFinite(valor)) return;
+            filas.push({
+                fecha: fecha || `Dato ${indice + 1}`,
+                valor,
+            });
+        });
+        return filas;
+    }
+
+    function filasDesdeJSON(texto, metrica) {
+        const datos = JSON.parse(texto);
+        let lista = [];
+        if (Array.isArray(datos)) lista = datos;
+        else if (datos && typeof datos === "object") {
+            if (
+                datos.metricas &&
+                datos.metricas[metrica] &&
+                Array.isArray(datos.metricas[metrica].filas)
+            ) {
+                lista = datos.metricas[metrica].filas;
+            } else if (Array.isArray(datos.data)) lista = datos.data;
+            else if (Array.isArray(datos.filas)) lista = datos.filas;
+            else if (Array.isArray(datos[metrica])) lista = datos[metrica];
+            else {
+                lista = Object.entries(datos)
+                    .filter(([, valor]) => typeof valor === "number")
+                    .map(([fecha, valor]) => [fecha, valor]);
+            }
+        }
+        const filas = [];
+        lista.forEach((elemento, indice) => {
+            let fecha = "";
+            let valor = NaN;
+            if (Array.isArray(elemento)) {
+                fecha = elemento[0];
+                valor = parseNumero(elemento[1]);
+            } else if (elemento && typeof elemento === "object") {
+                fecha =
+                    elemento.fecha ??
+                    elemento.date ??
+                    elemento.Fecha ??
+                    elemento.Date ??
+                    elemento.dia ??
+                    elemento.day ??
+                    "";
+                valor = parseNumero(
+                    elemento.valor ??
+                        elemento.value ??
+                        elemento.Valor ??
+                        elemento[metrica] ??
+                        elemento.total,
+                );
+            }
+            if (!Number.isFinite(valor)) return;
+            filas.push({
+                fecha: parseFecha(fecha) || `Dato ${indice + 1}`,
+                valor,
+            });
+        });
+        return filas;
+    }
+
+    /* ---------- Gráfica de línea ---------- */
+    function pasoBonito(rango, divisiones) {
+        const bruto = Math.abs(rango) / Math.max(1, divisiones);
+        if (!Number.isFinite(bruto) || bruto <= 0) return 1;
+        const potencia = Math.pow(10, Math.floor(Math.log10(bruto)));
+        const proporcion = bruto / potencia;
+        const multiplicador =
+            proporcion > 5 ? 10 : proporcion > 2 ? 5 : proporcion > 1 ? 2 : 1;
+        return multiplicador * potencia;
+    }
+
+    function dibujarGrafica(host, filas, id) {
+        if (!host) return;
+        if (!filas || !filas.length) {
+            host.hidden = true;
+            host.replaceChildren();
+            return;
+        }
+        host.hidden = false;
+        const orden = ordenarFilas(filas);
+        const W = 900;
+        const H = 340;
+        const margen = { arriba: 26, derecha: 30, abajo: 48, izquierda: 78 };
+        const ancho = W - margen.izquierda - margen.derecha;
+        const alto = H - margen.arriba - margen.abajo;
+        const valores = orden.map((fila) => fila.valor);
+        const minimo = Math.min(...valores);
+        const maximo = Math.max(...valores);
+        const rango = maximo - minimo;
+        const paso = pasoBonito(
+            rango || Math.max(1, Math.abs(maximo) * 0.4 || 1),
+            4,
+        );
+        const piso = Math.floor(minimo / paso) * paso;
+        const techo = Math.max(piso + paso, Math.ceil(maximo / paso) * paso);
+        const x = (indice) =>
+            orden.length === 1
+                ? margen.izquierda + ancho / 2
+                : margen.izquierda + (ancho * indice) / (orden.length - 1);
+        const y = (valor) =>
+            margen.arriba +
+            alto * (1 - (valor - piso) / (techo - piso));
+        const base = margen.arriba + alto;
+        const uid = `${id}-${Math.random().toString(36).slice(2, 8)}`;
+        const partes = [];
+        partes.push(
+            `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Diagrama de línea de ${escaparHtml(NOMBRES[id])}">`,
+        );
+        partes.push(
+            `<defs><linearGradient id="area-${uid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#2c6076" stop-opacity="0.20"></stop><stop offset="100%" stop-color="#2c6076" stop-opacity="0"></stop></linearGradient></defs>`,
+        );
+        const marcas = [];
+        for (let valor = piso; valor <= techo + paso * 0.5; valor += paso) {
+            marcas.push(valor);
+        }
+        marcas.forEach((valor) => {
+            const py = y(valor);
+            partes.push(
+                `<line x1="${margen.izquierda}" y1="${py.toFixed(2)}" x2="${margen.izquierda + ancho}" y2="${py.toFixed(2)}" stroke="#d8dee4" stroke-width="1"></line>`,
+            );
+            partes.push(
+                `<text x="${margen.izquierda - 12}" y="${(py + 4).toFixed(2)}" text-anchor="end" fill="#6b7785" font-size="12">${escaparHtml(fmtCompacto.format(valor))}</text>`,
+            );
+        });
+        partes.push(
+            `<line x1="${margen.izquierda}" y1="${base}" x2="${margen.izquierda + ancho}" y2="${base}" stroke="#bcc5cd" stroke-width="1.2"></line>`,
+        );
+        const puntos = orden.map((fila, indice) => [
+            x(indice),
+            y(fila.valor),
+        ]);
+        let trazo;
+        if (puntos.length === 1) {
+            trazo = `M${margen.izquierda.toFixed(2)} ${puntos[0][1].toFixed(2)} L${(margen.izquierda + ancho).toFixed(2)} ${puntos[0][1].toFixed(2)}`;
+        } else {
+            trazo = puntos
+                .map(
+                    ([px, py], indice) =>
+                        `${indice === 0 ? "M" : "L"}${px.toFixed(2)} ${py.toFixed(2)}`,
+                )
+                .join(" ");
+        }
+        partes.push(
+            `<path d="${trazo} L${(margen.izquierda + ancho).toFixed(2)} ${base} L${margen.izquierda.toFixed(2)} ${base} Z" fill="url(#area-${uid})"></path>`,
+        );
+        partes.push(
+            `<path d="${trazo}" fill="none" stroke="#2c6076" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path>`,
+        );
+        puntos.forEach(([px, py], indice) => {
+            partes.push(
+                `<circle cx="${px.toFixed(2)}" cy="${py.toFixed(2)}" r="4.5" fill="#ffffff" stroke="#2c6076" stroke-width="2.5"><title>${escaparHtml(fmtFechaTitulo(orden[indice].fecha))}: ${escaparHtml(fmtNum(orden[indice].valor))}</title></circle>`,
+            );
+        });
+        const indices = new Set();
+        if (orden.length <= 7) {
+            orden.forEach((_, indice) => indices.add(indice));
+        } else {
+            for (let k = 0; k < 7; k++) {
+                indices.add(Math.round((k * (orden.length - 1)) / 6));
+            }
+        }
+        [...indices]
+            .sort((a, b) => a - b)
+            .forEach((indice) => {
+                const px = x(indice);
+                const anclaje =
+                    orden.length === 1
+                        ? "middle"
+                        : indice === 0
+                          ? "start"
+                          : indice === orden.length - 1
+                            ? "end"
+                            : "middle";
+                partes.push(
+                    `<text x="${px.toFixed(2)}" y="${(base + 24).toFixed(2)}" text-anchor="${anclaje}" fill="#6b7785" font-size="12">${escaparHtml(fmtFechaCorta(orden[indice].fecha))}</text>`,
+                );
+            });
+        partes.push("</svg>");
+        host.innerHTML = partes.join("");
+    }
+
+    /* ---------- Tablas ---------- */
+    function crearCelda(texto, clase) {
+        const celda = document.createElement("td");
+        if (clase) celda.className = clase;
+        celda.textContent = texto;
+        return celda;
+    }
+
+    function porcentajeCambio(actual, anterior) {
+        if (!Number.isFinite(anterior) || anterior === 0) return null;
+        return ((actual - anterior) / Math.abs(anterior)) * 100;
+    }
+
+    function crearFilaCambio(actual, anterior) {
+        const cambio = porcentajeCambio(actual, anterior);
+        if (cambio === null) return crearCelda("—", "cambio");
+        return crearCelda(
+            `${cambio >= 0 ? "+" : ""}${cambio.toFixed(1)}%`,
+            `cambio ${cambio >= 0 ? "sube" : "baja"}`,
+        );
+    }
+
+    function llenarTabla(id) {
+        const tabla = document.querySelector(`table[data-tabla="${id}"]`);
+        if (!tabla) return;
+        const cuerpo = tabla.querySelector("tbody");
+        const orden = ordenarFilas(estado[id].filas);
+        cuerpo.replaceChildren();
+        orden.forEach((fila, indice) => {
+            const tr = document.createElement("tr");
+            tr.append(crearCelda(fmtFechaTitulo(fila.fecha)));
+            tr.append(crearCelda(fmtNum(fila.valor), "num"));
+            tr.append(
+                indice === 0
+                    ? crearCelda("—", "cambio")
+                    : crearFilaCambio(fila.valor, orden[indice - 1].valor),
+            );
+            const acciones = document.createElement("td");
+            acciones.className = "celda-acciones";
+            const boton = document.createElement("button");
+            boton.type = "button";
+            boton.className = "btn-eliminar";
+            boton.textContent = "Eliminar";
+            boton.setAttribute(
+                "aria-label",
+                `Eliminar el dato del ${fmtFechaTitulo(fila.fecha)}`,
+            );
+            boton.addEventListener("click", () => {
+                estado[id].filas = estado[id].filas.filter(
+                    (registro) => registro.fecha !== fila.fecha,
+                );
+                guardarEstado();
+                actualizarTodo();
+                toast("Registro eliminado.");
+            });
+            acciones.append(boton);
+            tr.append(acciones);
+            cuerpo.append(tr);
+        });
+        const contenedor = tabla.closest(".tabla-wrap");
+        if (contenedor) contenedor.hidden = orden.length === 0;
+        const vacio = document.querySelector(`[data-vacio-tabla="${id}"]`);
+        if (vacio) vacio.hidden = orden.length > 0;
+    }
+
+    function llenarTablaPresentacion(id) {
+        const tabla = document.querySelector(
+            `table[data-pres-tabla="${id}"]`,
+        );
+        if (!tabla) return;
+        const cuerpo = tabla.querySelector("tbody");
+        const orden = ordenarFilas(estado[id].filas);
+        cuerpo.replaceChildren();
+        orden.forEach((fila, indice) => {
+            const tr = document.createElement("tr");
+            tr.append(crearCelda(fmtFechaTitulo(fila.fecha)));
+            tr.append(crearCelda(fmtNum(fila.valor), "num"));
+            tr.append(
+                indice === 0
+                    ? crearCelda("—", "cambio")
+                    : crearFilaCambio(fila.valor, orden[indice - 1].valor),
+            );
+            cuerpo.append(tr);
+        });
+        const contenedor = document.querySelector(
+            `[data-pres-tabla-wrap="${id}"]`,
+        );
+        if (contenedor) contenedor.hidden = orden.length === 0;
+    }
+
+    /* ---------- Galerías ---------- */
+    function abrirLightbox(foto) {
+        const caja = document.getElementById("lightbox");
+        const imagen = document.getElementById("lightbox-img");
+        const leyenda = document.getElementById("lightbox-caption");
+        if (!caja || !imagen || !leyenda) return;
+        imagen.src = foto.src;
+        imagen.alt = foto.nombre;
+        leyenda.textContent = foto.nombre;
+        caja.hidden = false;
+        document.body.style.overflow = "hidden";
+    }
+
+    function cerrarLightbox() {
+        const caja = document.getElementById("lightbox");
+        if (!caja || caja.hidden) return;
+        caja.hidden = true;
+        document.body.style.overflow = "";
+        const imagen = document.getElementById("lightbox-img");
+        if (imagen) imagen.removeAttribute("src");
+    }
+
+    function llenarGaleria(id) {
+        const contenedor = document.querySelector(`[data-galeria="${id}"]`);
+        if (!contenedor) return;
+        contenedor.replaceChildren();
+        estado[id].fotos.forEach((foto) => {
+            const figura = document.createElement("figure");
+            figura.className = "foto";
+            const abrir = document.createElement("button");
+            abrir.type = "button";
+            abrir.className = "foto-abrir";
+            abrir.setAttribute("aria-label", `Ver captura: ${foto.nombre}`);
+            const imagen = document.createElement("img");
+            imagen.src = foto.src;
+            imagen.alt = foto.nombre;
+            imagen.loading = "lazy";
+            abrir.append(imagen);
+            abrir.addEventListener("click", () => abrirLightbox(foto));
+            const borrar = document.createElement("button");
+            borrar.type = "button";
+            borrar.className = "foto-eliminar";
+            borrar.textContent = "×";
+            borrar.setAttribute(
+                "aria-label",
+                `Eliminar captura: ${foto.nombre}`,
+            );
+            borrar.addEventListener("click", () => {
+                estado[id].fotos = estado[id].fotos.filter(
+                    (registro) => registro !== foto,
+                );
+                guardarEstado();
+                actualizarTodo();
+                toast("Foto eliminada.");
+            });
+            figura.append(abrir, borrar);
+            contenedor.append(figura);
+        });
+        if (estado[id].fotos.length < MAX_FOTOS) {
+            const agregar = document.createElement("button");
+            agregar.type = "button";
+            agregar.className = "foto-agregar";
+            agregar.innerHTML =
+                '<strong aria-hidden="true">+</strong><span>Agregar foto</span>';
+            agregar.setAttribute(
+                "aria-label",
+                `Agregar fotos de ${NOMBRES[id]}`,
+            );
+            agregar.addEventListener("click", () => {
+                document
+                    .querySelector(`[data-fotos-input="${id}"]`)
+                    ?.click();
+            });
+            contenedor.append(agregar);
+        }
+    }
+
+    function llenarGaleriaPresentacion(id) {
+        const contenedor = document.querySelector(
+            `[data-pres-galeria="${id}"]`,
+        );
+        if (!contenedor) return;
+        contenedor.replaceChildren();
+        estado[id].fotos.forEach((foto) => {
+            const figura = document.createElement("figure");
+            figura.className = "foto";
+            const abrir = document.createElement("button");
+            abrir.type = "button";
+            abrir.className = "foto-abrir";
+            abrir.setAttribute("aria-label", `Ver captura: ${foto.nombre}`);
+            const imagen = document.createElement("img");
+            imagen.src = foto.src;
+            imagen.alt = foto.nombre;
+            imagen.loading = "lazy";
+            abrir.append(imagen);
+            abrir.addEventListener("click", () => abrirLightbox(foto));
+            figura.append(abrir);
+            contenedor.append(figura);
+        });
+        contenedor.hidden = estado[id].fotos.length === 0;
+        const etiqueta = document.querySelector(
+            `[data-pres-fotos-label="${id}"]`,
+        );
+        if (etiqueta) etiqueta.hidden = estado[id].fotos.length === 0;
+    }
+
+    /* ---------- Resumen y presentación ---------- */
+    function resumenFilas(filas) {
+        const orden = ordenarFilas(filas);
+        const valores = orden.map((fila) => fila.valor);
+        const ultimo = valores[valores.length - 1];
+        const primero = valores[0];
+        const promedio =
+            valores.reduce((total, valor) => total + valor, 0) / valores.length;
+        const maximo = Math.max(...valores);
+        const variacion =
+            primero === 0
+                ? null
+                : ((ultimo - primero) / Math.abs(primero)) * 100;
+        return { ultimo, primero, promedio, maximo, variacion };
+    }
+
+    function agregarKpi(contenedor, etiqueta, valor, clase) {
+        const caja = document.createElement("div");
+        caja.className = "pres-kpi";
+        const titulo = document.createElement("span");
+        titulo.textContent = etiqueta;
+        const dato = document.createElement("strong");
+        dato.textContent = valor;
+        if (clase) dato.classList.add(clase);
+        caja.append(titulo, dato);
+        contenedor.append(caja);
+    }
+
+    function actualizarPresentacion() {
+        const fechaEl = document.querySelector("[data-pres-fecha]");
+        if (fechaEl) {
+            fechaEl.textContent = `Generado el ${new Date().toLocaleDateString("es-MX", { day: "numeric", month: "long", year: "numeric" })}`;
+        }
+        let secciones = 0;
+        IDS.forEach((id) => {
+            const bloque = document.querySelector(
+                `[data-pres-bloque="${id}"]`,
+            );
+            if (!bloque) return;
+            const filas = estado[id].filas;
+            const fotos = estado[id].fotos;
+            const tieneDatos = filas.length > 0 || fotos.length > 0;
+            bloque.hidden = !tieneDatos;
+            if (!tieneDatos) return;
+            secciones++;
+            const orden = ordenarFilas(filas);
+            const rango = document.querySelector(
+                `[data-pres-rango="${id}"]`,
+            );
+            if (rango) {
+                if (!orden.length) {
+                    rango.textContent = "Capturas sin datos numéricos";
+                } else if (orden.length === 1) {
+                    rango.textContent = fmtFechaTitulo(orden[0].fecha);
+                } else {
+                    const opciones = {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                    };
+                    rango.textContent = `${fmtFechaCorta(orden[0].fecha, opciones)} — ${fmtFechaCorta(orden[orden.length - 1].fecha, opciones)}`;
+                }
+            }
+            const kpis = document.querySelector(`[data-pres-kpis="${id}"]`);
+            if (kpis) {
+                kpis.replaceChildren();
+                if (filas.length) {
+                    const resumen = resumenFilas(filas);
+                    agregarKpi(kpis, "Último dato", fmtNum(resumen.ultimo));
+                    agregarKpi(
+                        kpis,
+                        "Promedio",
+                        fmtNum(
+                            Math.round(resumen.promedio * 100) / 100,
+                        ),
+                    );
+                    agregarKpi(kpis, "Máximo", fmtNum(resumen.maximo));
+                    agregarKpi(
+                        kpis,
+                        "Variación",
+                        resumen.variacion === null
+                            ? "—"
+                            : `${resumen.variacion >= 0 ? "+" : ""}${resumen.variacion.toFixed(1)}%`,
+                        resumen.variacion === null
+                            ? ""
+                            : resumen.variacion >= 0
+                              ? "sube"
+                              : "baja",
+                    );
+                    agregarKpi(kpis, "Registros", String(filas.length));
+                }
+                kpis.hidden = filas.length === 0;
+            }
+            const grafica = document.querySelector(
+                `[data-pres-grafica="${id}"]`,
+            );
+            if (grafica) {
+                dibujarGrafica(grafica, filas, id);
+                grafica.hidden = filas.length === 0;
+            }
+            llenarTablaPresentacion(id);
+            llenarGaleriaPresentacion(id);
+        });
+        const vacio = document.querySelector("[data-pres-vacio]");
+        if (vacio) vacio.hidden = secciones > 0;
+        return secciones;
+    }
+
+    /* ---------- Fotos ---------- */
+    function comprimirImagen(archivo) {
+        return new Promise((resolver, rechazar) => {
+            const url = URL.createObjectURL(archivo);
+            const imagen = new Image();
+            imagen.onload = () => {
+                try {
+                    const maximo = 900;
+                    const escala = Math.min(
+                        1,
+                        maximo /
+                            Math.max(
+                                imagen.naturalWidth || 1,
+                                imagen.naturalHeight || 1,
+                            ),
+                    );
+                    const ancho = Math.max(
+                        1,
+                        Math.round((imagen.naturalWidth || 1) * escala),
+                    );
+                    const alto = Math.max(
+                        1,
+                        Math.round((imagen.naturalHeight || 1) * escala),
+                    );
+                    const lienzo = document.createElement("canvas");
+                    lienzo.width = ancho;
+                    lienzo.height = alto;
+                    const contexto = lienzo.getContext("2d");
+                    if (!contexto) throw new Error("Canvas no disponible");
+                    contexto.fillStyle = "#ffffff";
+                    contexto.fillRect(0, 0, ancho, alto);
+                    contexto.drawImage(imagen, 0, 0, ancho, alto);
+                    resolver(lienzo.toDataURL("image/jpeg", 0.72));
+                } catch (error) {
+                    rechazar(error);
+                } finally {
+                    URL.revokeObjectURL(url);
+                }
+            };
+            imagen.onerror = () => {
+                URL.revokeObjectURL(url);
+                rechazar(new Error("Formato de imagen no compatible"));
+            };
+            imagen.src = url;
+        });
+    }
+
+    async function agregarFotos(id, archivos) {
+        const lista = Array.from(archivos);
+        const espacio = MAX_FOTOS - estado[id].fotos.length;
+        if (espacio <= 0) {
+            toast(`Puedes guardar hasta ${MAX_FOTOS} fotos por métrica.`);
+            return;
+        }
+        if (lista.length > espacio) {
+            toast(
+                `Se agregarán ${espacio} de ${lista.length} fotos (límite ${MAX_FOTOS}).`,
+            );
+        }
+        let agregadas = 0;
+        for (const archivo of lista.slice(0, espacio)) {
+            if (!archivo.type.startsWith("image/")) continue;
+            try {
+                const src = await comprimirImagen(archivo);
+                estado[id].fotos.push({
+                    src,
+                    nombre: archivo.name.replace(/\.[^.]+$/, ""),
+                });
+                agregadas++;
+            } catch {
+                toast(`No se pudo procesar ${archivo.name}.`);
+            }
+        }
+        if (!agregadas) return;
+        guardarEstado();
+        actualizarTodo();
+        toast(
+            `${agregadas} ${agregadas === 1 ? "foto agregada" : "fotos agregadas"}.`,
+        );
+    }
+
+    /* ---------- Importación ---------- */
+    async function importarArchivo(id, archivo) {
+        try {
+            const texto = await archivo.text();
+            if (!texto.trim()) {
+                throw new Error("El archivo está vacío.");
+            }
+            const esJSON =
+                /\.json$/i.test(archivo.name) ||
+                texto.trim().startsWith("[") ||
+                texto.trim().startsWith("{");
+            const filas = esJSON
+                ? filasDesdeJSON(texto, id)
+                : filasDesdeCSV(texto, id);
+            if (!filas.length) {
+                throw new Error(
+                    "No se encontraron filas con fecha y valor válidos.",
+                );
+            }
+            let nuevas = 0;
+            let actualizadas = 0;
+            filas.forEach((fila) => {
+                const existente = estado[id].filas.find(
+                    (registro) => registro.fecha === fila.fecha,
+                );
+                if (existente) {
+                    existente.valor = fila.valor;
+                    actualizadas++;
+                } else {
+                    estado[id].filas.push(fila);
+                    nuevas++;
+                }
+            });
+            guardarEstado();
+            actualizarTodo();
+            toast(
+                `${NOMBRES[id]}: ${nuevas} datos nuevos, ${actualizadas} actualizados.`,
+            );
+        } catch (error) {
+            toast(
+                error instanceof Error
+                    ? error.message
+                    : "No se pudo leer el archivo.",
+            );
+        }
+    }
+
+    /* ---------- Actualización general ---------- */
+    function actualizarTodo() {
+        IDS.forEach((id) => {
+            const filas = estado[id].filas;
+            const fotos = estado[id].fotos;
+            const orden = ordenarFilas(filas);
+            const subtitulo = document.querySelector(`[data-sub="${id}"]`);
+            if (subtitulo) {
+                if (!filas.length && !fotos.length) {
+                    subtitulo.textContent = "Sin datos.";
+                } else {
+                    const partes = [];
+                    if (filas.length) {
+                        partes.push(
+                            `${filas.length} ${filas.length === 1 ? "registro" : "registros"}`,
+                        );
+                    }
+                    if (fotos.length) {
+                        partes.push(
+                            `${fotos.length} ${fotos.length === 1 ? "foto" : "fotos"}`,
+                        );
+                    }
+                    if (orden.length) {
+                        partes.push(
+                            orden.length === 1
+                                ? fmtFechaCorta(orden[0].fecha, {
+                                      day: "numeric",
+                                      month: "short",
+                                      year: "numeric",
+                                  })
+                                : `${fmtFechaCorta(orden[0].fecha)} – ${fmtFechaCorta(orden[orden.length - 1].fecha)}`,
+                        );
+                    }
+                    subtitulo.textContent = partes.join(" · ");
+                }
+            }
+            const rango = document.querySelector(`[data-rango="${id}"]`);
+            if (rango) {
+                rango.textContent = !orden.length
+                    ? ""
+                    : orden.length === 1
+                      ? fmtFechaTitulo(orden[0].fecha)
+                      : `${fmtFechaCorta(orden[0].fecha)} — ${fmtFechaCorta(orden[orden.length - 1].fecha)}`;
+            }
+            const vacio = document.querySelector(`[data-vacio="${id}"]`);
+            if (vacio) vacio.hidden = filas.length > 0;
+            dibujarGrafica(
+                document.querySelector(`[data-grafica="${id}"]`),
+                filas,
+                id,
+            );
+            llenarTabla(id);
+            llenarGaleria(id);
+            const conteo = document.querySelector(`[data-conteo="${id}"]`);
+            if (conteo) {
+                conteo.textContent = `${filas.length} ${filas.length === 1 ? "registro" : "registros"}`;
+            }
+            const conteoFotos = document.querySelector(
+                `[data-conteo-fotos="${id}"]`,
+            );
+            if (conteoFotos) {
+                conteoFotos.textContent = `${fotos.length} ${fotos.length === 1 ? "foto" : "fotos"}`;
+            }
+            const cuenta = document.querySelector(`[data-cuenta="${id}"]`);
+            if (cuenta) cuenta.textContent = String(filas.length);
+        });
+        const secciones = actualizarPresentacion();
+        const cuentaPresentacion = document.querySelector(
+            '[data-cuenta="presentacion"]',
+        );
+        if (cuentaPresentacion) {
+            cuentaPresentacion.textContent = String(secciones);
+        }
+    }
+
+    /* ---------- Navegación ---------- */
+    const VISTAS = [...IDS, "presentacion"];
+
+    function vistaDesdeHash() {
+        const vista = window.location.hash.replace("#", "");
+        return VISTAS.includes(vista) ? vista : "alcance";
+    }
+
+    function mostrarVista(id) {
+        const destino = VISTAS.includes(id) ? id : "alcance";
+        document.querySelectorAll("[data-vista]").forEach((seccion) => {
+            seccion.hidden =
+                seccion.getAttribute("data-vista") !== destino;
+        });
+        document.querySelectorAll("[data-ir]").forEach((boton) => {
+            const activo = boton.getAttribute("data-ir") === destino;
+            if (activo) boton.setAttribute("aria-current", "true");
+            else boton.removeAttribute("aria-current");
+        });
+        cerrarLightbox();
+    }
+
+    function irA(id) {
+        if (window.location.hash === `#${id}`) mostrarVista(id);
+        else window.location.hash = id;
+    }
+
+    /* ---------- Formulario manual ---------- */
+    function alternarManual(id, mostrar) {
+        const formulario = document.querySelector(`[data-form="${id}"]`);
+        const boton = document.querySelector(
+            `[data-accion="manual"][data-metrica="${id}"]`,
+        );
+        if (!formulario || !boton) return;
+        formulario.hidden = !mostrar;
+        boton.setAttribute("aria-expanded", String(mostrar));
+        if (mostrar) {
+            const fecha = formulario.querySelector('input[name="fecha"]');
+            const valor = formulario.querySelector('input[name="valor"]');
+            if (fecha && !fecha.value) fecha.value = hoyISO();
+            if (valor) valor.focus();
+        }
+    }
+
+    document.querySelectorAll("[data-accion]").forEach((elemento) => {
+        const boton = elemento;
+        const accion = boton.getAttribute("data-accion");
+        const id = boton.getAttribute("data-metrica") || "";
+        if (accion === "importar") {
+            boton.addEventListener("click", () => {
+                document.querySelector(`[data-file="${id}"]`)?.click();
+            });
+        } else if (accion === "manual") {
+            boton.addEventListener("click", () => {
+                const formulario = document.querySelector(
+                    `[data-form="${id}"]`,
+                );
+                alternarManual(id, formulario?.hidden !== false);
+            });
+        } else if (accion === "cerrar-manual") {
+            boton.addEventListener("click", () => alternarManual(id, false));
+        } else if (accion === "limpiar") {
+            boton.addEventListener("click", () => {
+                const confirmado = window.confirm(
+                    `¿Eliminar todos los datos y fotos de ${NOMBRES[id]}?`,
+                );
+                if (!confirmado) return;
+                estado[id] = { filas: [], fotos: [] };
+                guardarEstado();
+                actualizarTodo();
+                toast("Sección limpiada.");
+            });
+        } else if (accion === "fotos") {
+            boton.addEventListener("click", () => {
+                document
+                    .querySelector(`[data-fotos-input="${id}"]`)
+                    ?.click();
+            });
+        } else if (accion === "exportar") {
+            boton.addEventListener("click", exportarDatos);
+        } else if (accion === "imprimir") {
+            boton.addEventListener("click", () => window.print());
+        }
+    });
+
+    document.querySelectorAll("[data-form]").forEach((elemento) => {
+        const formulario = elemento;
+        const id = formulario.getAttribute("data-form") || "";
+        formulario.addEventListener("submit", (evento) => {
+            evento.preventDefault();
+            const datos = new FormData(formulario);
+            const fechaCruda = String(datos.get("fecha") || "").trim();
+            const valor = Number(datos.get("valor"));
+            if (!fechaCruda || !Number.isFinite(valor)) {
+                toast("Completa la fecha y un valor numérico.");
+                return;
+            }
+            const fecha = parseFecha(fechaCruda) || fechaCruda;
+            const existente = estado[id].filas.find(
+                (registro) => registro.fecha === fecha,
+            );
+            if (existente) {
+                existente.valor = valor;
+                toast(
+                    `Dato del ${fmtFechaTitulo(fecha)} actualizado.`,
+                );
+            } else {
+                estado[id].filas.push({ fecha, valor });
+                toast(
+                    `Dato agregado: ${fmtFechaCorta(fecha)} · ${fmtNum(valor)}.`,
+                );
+            }
+            guardarEstado();
+            actualizarTodo();
+            formulario.reset();
+            const campoFecha = formulario.querySelector(
+                'input[name="fecha"]',
+            );
+            const campoValor = formulario.querySelector(
+                'input[name="valor"]',
+            );
+            if (campoFecha) campoFecha.value = hoyISO();
+            if (campoValor) campoValor.focus();
+        });
+    });
+
+    document.querySelectorAll("[data-file]").forEach((elemento) => {
+        const input = elemento;
+        const id = input.getAttribute("data-file") || "";
+        input.addEventListener("change", () => {
+            const archivo = input.files && input.files[0];
+            if (archivo) importarArchivo(id, archivo);
+            input.value = "";
+        });
+    });
+
+    document.querySelectorAll("[data-fotos-input]").forEach((elemento) => {
+        const input = elemento;
+        const id = input.getAttribute("data-fotos-input") || "";
+        input.addEventListener("change", () => {
+            if (input.files && input.files.length) {
+                agregarFotos(id, input.files);
+            }
+            input.value = "";
+        });
+    });
+
+    document.querySelectorAll("[data-ir]").forEach((boton) => {
+        boton.addEventListener("click", () => {
+            irA(boton.getAttribute("data-ir") || "alcance");
+        });
+    });
+
+    /* ---------- Menú de importación ---------- */
+    const botonImportar = document.getElementById("btn-importar");
+    const menuImportar = document.getElementById("menu-importar");
+
+    function cerrarMenu() {
+        if (!menuImportar || !botonImportar) return;
+        menuImportar.hidden = true;
+        botonImportar.setAttribute("aria-expanded", "false");
+    }
+
+    botonImportar?.addEventListener("click", (evento) => {
+        evento.stopPropagation();
+        if (!menuImportar) return;
+        const abrir = menuImportar.hidden;
+        menuImportar.hidden = !abrir;
+        botonImportar.setAttribute("aria-expanded", String(abrir));
+    });
+
+    document.querySelectorAll("[data-importar]").forEach((boton) => {
+        boton.addEventListener("click", () => {
+            const id = boton.getAttribute("data-importar") || "";
+            cerrarMenu();
+            mostrarVista(id);
+            if (window.location.hash !== `#${id}`) {
+                window.location.hash = id;
+            }
+            document.querySelector(`[data-file="${id}"]`)?.click();
+        });
+    });
+
+    document.addEventListener("click", (evento) => {
+        if (
+            menuImportar &&
+            !menuImportar.hidden &&
+            evento.target instanceof Node &&
+            !menuImportar.contains(evento.target) &&
+            !botonImportar?.contains(evento.target)
+        ) {
+            cerrarMenu();
+        }
+    });
+
+    /* ---------- Lightbox ---------- */
+    document
+        .querySelector(".lightbox-cerrar")
+        ?.addEventListener("click", cerrarLightbox);
+    document
+        .getElementById("lightbox")
+        ?.addEventListener("click", (evento) => {
+            if (evento.target === evento.currentTarget) cerrarLightbox();
+        });
+    document.addEventListener("keydown", (evento) => {
+        if (evento.key === "Escape") {
+            cerrarLightbox();
+            cerrarMenu();
+        }
+    });
+
+    function exportarDatos() {
+        const contenido = JSON.stringify(
+            {
+                generado: new Date().toISOString(),
+                metricas: estado,
+            },
+            null,
+            2,
+        );
+        const blob = new Blob([contenido], {
+            type: "application/json",
+        });
+        const enlace = document.createElement("a");
+        enlace.href = URL.createObjectURL(blob);
+        enlace.download = `reportes-${hoyISO()}.json`;
+        enlace.click();
+        window.setTimeout(() => URL.revokeObjectURL(enlace.href), 1000);
+        toast("Datos exportados.");
+    }
+
+    /* ---------- Arranque ---------- */
+    window.addEventListener("hashchange", () => {
+        mostrarVista(vistaDesdeHash());
+    });
+
+    document.querySelectorAll('input[name="fecha"]').forEach((campo) => {
+        if (!campo.value) campo.value = hoyISO();
+    });
+
+    mostrarVista(vistaDesdeHash());
+    actualizarTodo();
+
+</script>
