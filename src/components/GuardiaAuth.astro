@@ -1,9 +1,11 @@
 ---
 ---
 
-<script is:inline>
+<script>
+    import { obtenerSesion } from "../lib/auth.ts";
+
     try {
-        if (sessionStorage.getItem("iria_auth") !== "true") {
+        if (!(await obtenerSesion())) {
             window.location.replace("/");
         }
     } catch {

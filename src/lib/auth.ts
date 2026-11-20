@@ -1,61 +1,44 @@
-const AUTH_KEY = "iria_auth";
-const USER_KEY = "iria_user";
+import type { Session } from "@supabase/supabase-js";
+import { createBrowserSupabaseClient } from "./supabase-browser";
 
-function enNavegador(): boolean {
-    return (
-        typeof window !== "undefined" && typeof sessionStorage !== "undefined"
-    );
-}
+export type ResultadoLogin = { ok: boolean; error: string | null };
 
-export function estaAutenticado(): boolean {
-    if (!enNavegador()) return false;
-    return sessionStorage.getItem(AUTH_KEY) === "true";
-}
+export async function iniciarSesion(
+    correo: string,
+    contrasena: string,
+): Promise<ResultadoLogin> {
+    const supabase = createBrowserSupabaseClient();
 
-export function obtenerCorreo(): string | null {
-    if (!enNavegador()) return null;
-    return sessionStorage.getItem(USER_KEY);
-}
+    const { error } = await supabase.auth.signInWithPassword({
+        email: correo.trim(),
+        password: contrasena,
+    });
 
-function leerCredenciales(): { email?: string; password?: string } {
-    return {
-        email:
-            import.meta.env.PUBLIC_AUTH_EMAIL ??
-            import.meta.env.PUBLIC_AUTH_EMAIL_PROD,
-        password:
-            import.meta.env.PUBLIC_AUTH_PASSWORD ??
-            import.meta.env.PUBLIC_AUTH_PASSWORD_PROD,
-    };
-}
-
-export function credencialesConfiguradas(): boolean {
-    const { email, password } = leerCredenciales();
-    return Boolean(email && password);
-}
-
-export function iniciarSesion(correo: string, contrasena: string): boolean {
-    if (!enNavegador()) return false;
-
-    const { email: AUTH_EMAIL, password: AUTH_PASSWORD } =
-        leerCredenciales();
-
-    const correoLimpio = correo.trim();
-
-    if (!AUTH_EMAIL || !AUTH_PASSWORD) return false;
-
-    if (correoLimpio === AUTH_EMAIL && contrasena === AUTH_PASSWORD) {
-        sessionStorage.setItem(AUTH_KEY, "true");
-        sessionStorage.setItem(USER_KEY, correoLimpio);
-        window.dispatchEvent(new CustomEvent("iria:auth-change"));
-        return true;
+    if (error) {
+        return { ok: false, error: error.message };
     }
 
-    return false;
+    window.dispatchEvent(new CustomEvent("iria:auth-change"));
+    return { ok: true, error: null };
 }
 
-export function cerrarSesion(): void {
-    if (!enNavegador()) return;
-    sessionStorage.removeItem(AUTH_KEY);
-    sessionStorage.removeItem(USER_KEY);
+export async function cerrarSesion(): Promise<void> {
+    const supabase = createBrowserSupabaseClient();
+    await supabase.auth.signOut();
     window.dispatchEvent(new CustomEvent("iria:auth-change"));
+}
+
+export async function obtenerSesion(): Promise<Session | null> {
+    const supabase = createBrowserSupabaseClient();
+    const { data } = await supabase.auth.getSession();
+    return data.session;
+}
+
+export async function estaAutenticado(): Promise<boolean> {
+    return Boolean(await obtenerSesion());
+}
+
+export async function obtenerCorreo(): Promise<string | null> {
+    const sesion = await obtenerSesion();
+    return sesion?.user.email ?? null;
 }

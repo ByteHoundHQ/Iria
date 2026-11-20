@@ -60,13 +60,7 @@
 
 <script>
     import { prefetch } from "astro:prefetch";
-    import {
-        cerrarSesion,
-        credencialesConfiguradas,
-        iniciarSesion,
-    } from "../lib/auth.ts";
-
-    cerrarSesion();
+    import { iniciarSesion } from "../lib/auth.ts";
 
     prefetch("/seleccion");
 
@@ -133,7 +127,7 @@
         return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(correo);
     }
 
-    form?.addEventListener("submit", (e) => {
+    form?.addEventListener("submit", async (e) => {
         e.preventDefault();
         limpiarAviso();
 
@@ -174,29 +168,33 @@
             return;
         }
 
-        if (!credencialesConfiguradas()) {
-            mostrarAviso(
-                "error",
-                "No pudimos validar tus datos (configuración faltante).",
-            );
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = "Ingresando…";
+        }
+
+        const resultado = await iniciarSesion(email, password);
+
+        if (resultado.ok) {
+            window.location.href = "/seleccion";
             return;
         }
 
-        if (iniciarSesion(email, password)) {
-            if (submitBtn) {
-                submitBtn.disabled = true;
-                submitBtn.textContent = "Ingresando…";
-            }
-            window.location.href = "/seleccion";
-        } else {
-            mostrarAviso(
-                "error",
-                "Correo o contraseña incorrectos. Inténtalo de nuevo.",
-                [emailInput, passInput].filter(
-                    (x): x is HTMLInputElement => !!x,
-                ),
-            );
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Log In";
         }
+
+        const mensaje =
+            resultado.error?.toLowerCase().includes("invalid login")
+                ? "Correo o contraseña incorrectos. Inténtalo de nuevo."
+                : resultado.error ??
+                  "No pudimos iniciar sesión. Inténtalo de nuevo.";
+
+        mostrarAviso("error", mensaje, [
+            emailInput,
+            passInput,
+        ].filter((x): x is HTMLInputElement => !!x));
     });
 
     signupBtn?.addEventListener("click", () => {

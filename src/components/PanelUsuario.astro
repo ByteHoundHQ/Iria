@@ -6,12 +6,14 @@ import SelectorCirculos from "./SelectorCirculos.astro";
     <SelectorCirculos />
 </section>
 
-<script is:inline>
+<script>
+    import { cerrarSesion, obtenerSesion } from "../lib/auth.ts";
+
+    const panel = document.querySelector("[data-vista-panel]");
+
     try {
-        if (sessionStorage.getItem("iria_auth") === "true") {
-            document
-                .querySelector("[data-vista-panel]")
-                ?.removeAttribute("hidden");
+        if (await obtenerSesion()) {
+            panel?.removeAttribute("hidden");
         } else {
             window.location.replace("/");
         }
@@ -19,10 +21,9 @@ import SelectorCirculos from "./SelectorCirculos.astro";
         window.location.replace("/");
     }
 
-    document.getElementById("boton-regresar")?.addEventListener("click", () => {
+    document.getElementById("boton-regresar")?.addEventListener("click", async () => {
         try {
-            sessionStorage.removeItem("iria_auth");
-            sessionStorage.removeItem("iria_user");
+            await cerrarSesion();
         } catch {}
         window.dispatchEvent(new CustomEvent("iria:auth-change"));
     });
