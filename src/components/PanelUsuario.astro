@@ -21,10 +21,12 @@ import SelectorCirculos from "./SelectorCirculos.astro";
         window.location.replace("/");
     }
 
-    document.getElementById("boton-regresar")?.addEventListener("click", async () => {
+    document.getElementById("boton-regresar")?.addEventListener("click", async (event) => {
+        event.preventDefault();
         try {
             await cerrarSesion();
         } catch {}
         window.dispatchEvent(new CustomEvent("iria:auth-change"));
+        window.location.href = "/";
     });
 </script>

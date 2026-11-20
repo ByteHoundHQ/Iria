@@ -110,6 +110,7 @@ const esTarjeta = esConnect || esCreate || esCommunicate;
                                         href={op.href}
                                         class="opcion"
                                         data-seccion={op.id}
+                                        data-cursor-carga
                                         data-astro-prefetch="viewport"
                                     >
                                         {op.etiqueta}
@@ -119,6 +120,7 @@ const esTarjeta = esConnect || esCreate || esCommunicate;
                                         type="button"
                                         class="opcion"
                                         data-seccion={op.id}
+                                        data-cursor-carga
                                     >
                                         {op.etiqueta}
                                     </button>
@@ -156,17 +158,41 @@ const esTarjeta = esConnect || esCreate || esCommunicate;
 </section>
 
 <script>
+    import { activarCursorCarga } from "../lib/cursorCarga";
+
     document.getElementById("boton-comunicar")?.addEventListener("click", () => {
         window.dispatchEvent(new CustomEvent("iria:comunicar"));
     });
 
     document.querySelectorAll("[data-seccion]").forEach((el) => {
-        el.addEventListener("click", () => {
+        el.addEventListener("click", (event) => {
             const target = el as HTMLElement;
             const seccion = target.dataset.seccion ?? "";
             window.dispatchEvent(
                 new CustomEvent("iria:seccion", { detail: seccion }),
             );
+
+            // Solo las opciones con destino navegan; respetamos las
+            // aperturas en pestaña nueva (Ctrl/Cmd/Shift/Alt).
+            if (!(target instanceof HTMLAnchorElement)) return;
+            if (
+                event.button !== 0 ||
+                event.metaKey ||
+                event.ctrlKey ||
+                event.shiftKey ||
+                event.altKey
+            ) {
+                return;
+            }
+
+            event.preventDefault();
+            if (target.dataset.navegando === "true") return;
+            target.dataset.navegando = "true";
+
+            activarCursorCarga(target);
+            window.setTimeout(() => {
+                window.location.href = target.href;
+            }, 600);
         });
     });
 </script>
