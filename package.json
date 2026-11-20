@@ -12,6 +12,9 @@
     "astro": "astro"
   },
   "dependencies": {
+    "@astrojs/node": "^11.1.14",
+    "@supabase/ssr": "^0.12.7",
+    "@supabase/supabase-js": "^2.119.2",
     "astro": "^7.4.8"
   },
   "allowScripts": {
