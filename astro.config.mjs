@@ -12,25 +12,13 @@ export default defineConfig({
     },
     env: {
         schema: {
-            PUBLIC_AUTH_EMAIL: envField.string({
+            PUBLIC_SUPABASE_URL: envField.string({
                 context: 'client',
                 access: 'public',
-                optional: true,
             }),
-            PUBLIC_AUTH_PASSWORD: envField.string({
+            PUBLIC_SUPABASE_PUBLISHABLE_KEY: envField.string({
                 context: 'client',
                 access: 'public',
-                optional: true,
-            }),
-            PUBLIC_AUTH_EMAIL_PROD: envField.string({
-                context: 'client',
-                access: 'public',
-                optional: true,
-            }),
-            PUBLIC_AUTH_PASSWORD_PROD: envField.string({
-                context: 'client',
-                access: 'public',
-                optional: true,
             }),
         },
     },
