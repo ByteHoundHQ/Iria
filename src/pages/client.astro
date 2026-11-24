@@ -3,299 +3,556 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import GuardiaAuth from "../components/GuardiaAuth.astro";
 
 const clientes = [
-    { nombre: "Mariana López", empresa: "Café Roma Norte", email: "mariana@caferoma.mx", tel: "+52 55 1234 8801", plan: "Pro", estado: "Activo", proyectos: 6, iniciales: "ML" },
-    { nombre: "Jorge Hernández", empresa: "Taller Hernández", email: "jorge@tallerhz.mx", tel: "+52 55 9872 4410", plan: "Base", estado: "Activo", proyectos: 2, iniciales: "JH" },
-    { nombre: "Ana Paula Ruiz", empresa: "Librería Gandi Sur", email: "ana@gandisur.mx", tel: "+52 55 3321 0098", plan: "Pro", estado: "Pendiente", proyectos: 4, iniciales: "AR" },
-    { nombre: "Carlos Méndez", empresa: "Clínica Santa Fe", email: "carlos@clinicasf.mx", tel: "+52 55 4455 6677", plan: "Empresarial", estado: "Activo", proyectos: 9, iniciales: "CM" },
-    { nombre: "Lucía Fernández", empresa: "Hotel Catedral", email: "lucia@hotelcatedral.mx", tel: "+52 55 7788 1122", plan: "Base", estado: "Inactivo", proyectos: 1, iniciales: "LF" },
-    { nombre: "Diego Ramírez", empresa: "Distribuidora Andalucía", email: "diego@distandalucia.mx", tel: "+52 55 2233 4455", plan: "Pro", estado: "Activo", proyectos: 5, iniciales: "DR" },
-    { nombre: "Sofía Torres", empresa: "Estudio Nórdica", email: "sofia@nordica.mx", tel: "+52 55 6677 8899", plan: "Empresarial", estado: "Activo", proyectos: 11, iniciales: "ST" },
-    { nombre: "Pedro Aguilar", empresa: "Panadería La Espiga", email: "pedro@laespiga.mx", tel: "+52 55 1100 2233", plan: "Base", estado: "Pendiente", proyectos: 3, iniciales: "PA" },
+    { nombre: "Ibis Chihuahua", tono: "amarillo" },
+    { nombre: "Calesa", tono: "rosa" },
+    { nombre: "Bravar", tono: "azul" },
+    { nombre: "Degá", tono: "cafe" },
 ];
 ---
 
-<BaseLayout title="Iria — Clientes" description="Iria — Parrilla de clientes.">
+<BaseLayout title="Iria — Clientes" description="Iria — Tus clientes.">
+    <link
+        slot="head"
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+    />
+    <link
+        slot="head"
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    />
+    <link
+        slot="head"
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"
+    />
+
     <GuardiaAuth />
-    <main class="cli">
-        <header class="cli-top">
-            <div>
-                <h1>Clientes</h1>
-                <p>Parrilla de clientes del usuario · datos de ejemplo</p>
-            </div>
-            <a
-                href="/ind_2"
-                id="boton-volver"
-                class="btn-regresar"
-                data-astro-prefetch="viewport"
-                data-cursor-carga
-            >
-                Regresar
-            </a>
-        </header>
 
-        <div class="cli-tools">
-            <input
-                id="buscador"
-                type="search"
-                placeholder="Buscar por nombre o empresa…"
-                autocomplete="off"
-            />
-            <span id="contador" class="contador"></span>
-        </div>
+    <main class="clientes">
+        <section class="tablero" aria-labelledby="titulo-clientes">
+            <aside class="panel-notas" aria-label="Notas y prioridades">
+                <label class="panel-titulo" for="notas">
+                    Por hacer y prioridades
+                </label>
+                <div class="notas-marco">
+                    <div class="notas-caja">
+                        <textarea
+                            id="notas"
+                            class="notas"
+                            placeholder="Escribe aquí tus notas…"
+                            aria-describedby="estado-notas"
+                            spellcheck="true"></textarea>
+                    </div>
+                </div>
+                <p id="estado-notas" class="estado-notas" role="status">
+                    <span class="punto" aria-hidden="true"></span>
+                    <span id="estado-notas-texto"></span>
+                </p>
 
-        <section class="parrilla" aria-label="Lista de clientes">
-            {
-                clientes.map((c) => (
-                    <article
-                        class="tarjeta"
-                        data-busqueda={`${c.nombre} ${c.empresa}`.toLowerCase()}
+                <a
+                    href="/ind_2"
+                    id="boton-volver"
+                    class="btn-regresar"
+                    data-astro-prefetch="viewport"
+                    data-cursor-carga
+                >
+                    <svg
+                        class="btn-regresar-icono"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2.6"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        aria-hidden="true"
                     >
-                        <div class="tarjeta-head">
-                            <span class="avatar" aria-hidden="true">
-                                {c.iniciales}
-                            </span>
-                            <div>
-                                <strong>{c.nombre}</strong>
-                                <span class="empresa">{c.empresa}</span>
-                            </div>
-                            <span
-                                class:list={[
-                                    "pill",
-                                    c.estado === "Activo" && "ok",
-                                    c.estado === "Pendiente" && "warn",
-                                    c.estado === "Inactivo" && "off",
-                                ]}
-                            >
-                                {c.estado}
-                            </span>
-                        </div>
-                        <dl class="datos">
-                            <div>
-                                <dt>Plan</dt>
-                                <dd>{c.plan}</dd>
-                            </div>
-                            <div>
-                                <dt>Proyectos</dt>
-                                <dd>{c.proyectos}</dd>
-                            </div>
-                        </dl>
-                        <p class="contacto">{c.email}</p>
-                        <p class="contacto muted">{c.tel}</p>
-                    </article>
-                ))
-            }
+                        <path d="M15 5 8 12l7 7"></path>
+                    </svg>
+                    Regresar
+                </a>
+            </aside>
+
+            <div class="contenido">
+                <h1 id="titulo-clientes">Tus Clientes</h1>
+
+                <ul class="carpetas" aria-label="Lista de clientes">
+                    {
+                        clientes.map((c) => (
+                            <li class:list={["carpeta", c.tono]}>
+                                <span class="carpeta-icono" aria-hidden="true" />
+                                <span class="carpeta-nombre">{c.nombre}</span>
+                            </li>
+                        ))
+                    }
+                </ul>
+            </div>
+
+            <div class="adornos" aria-hidden="true">
+                <svg
+                    class="asterisco asterisco-azul"
+                    viewBox="0 0 100 100"
+                    fill="currentColor"
+                >
+                    {Array.from({ length: 8 }).map((_, i) => (
+                        <ellipse
+                            cx="50"
+                            cy="23"
+                            rx="8.5"
+                            ry="23"
+                            transform={`rotate(${i * 45} 50 50)`}
+                        />
+                    ))}
+                </svg>
+                <svg
+                    class="asterisco asterisco-vino"
+                    viewBox="0 0 100 100"
+                    fill="currentColor"
+                >
+                    {Array.from({ length: 8 }).map((_, i) => (
+                        <ellipse
+                            cx="50"
+                            cy="23"
+                            rx="9"
+                            ry="24"
+                            transform={`rotate(${i * 45} 50 50)`}
+                        />
+                    ))}
+                </svg>
+            </div>
         </section>
-        <p id="sin-resultados" class="sin-resultados" hidden>
-            Sin resultados para esa búsqueda.
-        </p>
     </main>
 </BaseLayout>
 
 <script>
-    const buscador = document.getElementById(
-        "buscador",
-    ) as HTMLInputElement | null;
-    const tarjetas = Array.from(
-        document.querySelectorAll<HTMLElement>(".tarjeta"),
-    );
-    const contador = document.getElementById("contador");
-    const vacio = document.getElementById("sin-resultados");
+    const CLAVE_NOTAS = "iria.clientes.notas";
+    const notas = document.getElementById("notas") as HTMLTextAreaElement | null;
+    const estadoTexto = document.getElementById("estado-notas-texto");
+    const estadoContenedor = document.getElementById("estado-notas");
 
-    function actualizar() {
-        const q = (buscador?.value ?? "").trim().toLowerCase();
-        let visibles = 0;
-        tarjetas.forEach((t) => {
-            const texto = t.dataset.busqueda ?? "";
-            const ok = !q || texto.includes(q);
-            t.style.display = ok ? "" : "none";
-            if (ok) visibles++;
-        });
-        if (contador) contador.textContent = `${visibles} clientes`;
-        vacio?.toggleAttribute("hidden", visibles !== 0);
+    function leerNotas(): string {
+        try {
+            return window.localStorage.getItem(CLAVE_NOTAS) ?? "";
+        } catch {
+            return "";
+        }
     }
 
-    buscador?.addEventListener("input", actualizar);
-    actualizar();
+    function guardarNotas(valor: string): boolean {
+        try {
+            window.localStorage.setItem(CLAVE_NOTAS, valor);
+            return true;
+        } catch {
+            return false;
+        }
+    }
+
+    if (notas) {
+        const guardadas = leerNotas();
+        if (guardadas) notas.value = guardadas;
+
+        let temporizador: number | undefined;
+
+        const avisar = (mensaje: string) => {
+            if (estadoTexto) estadoTexto.textContent = mensaje;
+            estadoContenedor?.classList.toggle("visible", Boolean(mensaje));
+        };
+
+        const guardar = () => {
+            const ok = guardarNotas(notas.value);
+            avisar(ok ? "Guardado automáticamente" : "No se pudo guardar");
+
+            window.clearTimeout(temporizador);
+            temporizador = window.setTimeout(() => avisar(""), 1800);
+        };
+
+        notas.addEventListener("input", guardar);
+
+        // Refuerzo por si el navegador cierra la página justo después de escribir.
+        window.addEventListener("pagehide", () => guardarNotas(notas.value));
+    }
 </script>
 
 <style>
-    .cli {
+    .clientes {
         min-height: 100vh;
-        background: #f1f5f9;
-        padding: 1.5rem;
         box-sizing: border-box;
+        padding: 18px;
+        background: #5c1011;
         display: flex;
-        flex-direction: column;
-        gap: 1.5rem;
+    }
+
+    .tablero {
+        position: relative;
+        flex: 1;
+        display: flex;
+        align-items: stretch;
+        gap: clamp(1.5rem, 4vw, 4rem);
+        box-sizing: border-box;
         width: 100%;
-        margin: 0;
+        min-height: calc(100vh - 36px);
+        padding: clamp(1.75rem, 3.6vw, 3.25rem) clamp(1.5rem, 3.6vw, 3.25rem)
+            clamp(1.5rem, 3vw, 2.5rem);
+        border-radius: 30px;
+        background: #fbf9f0;
+        box-shadow: 0 22px 45px rgba(30, 3, 3, 0.35);
+        overflow: hidden;
+        font-family: "Poppins", system-ui, sans-serif;
+        color: #3b2118;
     }
-    .cli-top {
-        background: #fff;
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        padding: 1.5rem;
+
+    .panel-notas {
+        flex: 0 0 auto;
+        width: clamp(240px, 24vw, 310px);
         display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 1rem;
+        flex-direction: column;
+        min-height: 100%;
     }
-    .cli-top h1 {
-        margin: 0;
-        font-size: 1.75rem;
-        font-weight: 800;
-        color: #0f172a;
-    }
-    .cli-top p {
-        margin: 0.25rem 0 0;
-        color: #64748b;
-    }
-    .btn-regresar {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        box-sizing: border-box;
-        text-decoration: none;
-        font-family: inherit;
-        border: none;
-        border-radius: 6px;
-        background: #0f172a;
-        color: #fff;
-        padding: 0.6rem 2rem;
-        font-size: 1rem;
-        cursor: pointer;
-        white-space: nowrap;
-    }
-    .btn-regresar:hover {
-        background: #1e293b;
-    }
-    .cli-tools {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-    }
-    .cli-tools input {
-        flex: 1;
-        padding: 0.8rem 1rem;
-        border: 1px solid #cbd5e1;
-        border-radius: 6px;
-        background: #fff;
-        font-size: 1rem;
-        color: #0f172a;
-    }
-    .contador {
-        font-size: 0.9rem;
-        color: #64748b;
+
+    .panel-titulo {
+        display: block;
+        margin: 0 0 0.6rem 0.2rem;
+        font-size: 0.88rem;
         font-weight: 600;
-        white-space: nowrap;
+        color: #4a3527;
+        letter-spacing: 0.01em;
     }
-    .parrilla {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-        gap: 1rem;
+
+    .notas-marco {
+        padding: 5px;
+        border-radius: 26px;
+        background: linear-gradient(
+            150deg,
+            #f6e9ad 0%,
+            #f2d3b4 26%,
+            #eab3b8 50%,
+            #c3def0 72%,
+            #9db3bd 100%
+        );
+        box-shadow:
+            0 12px 24px rgba(92, 16, 17, 0.14),
+            0 2px 4px rgba(92, 16, 17, 0.08);
     }
-    .tarjeta {
-        background: #fff;
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        padding: 1.2rem;
+
+    .notas-caja {
         display: flex;
-        flex-direction: column;
-        gap: 0.8rem;
+        height: clamp(340px, 52vh, 470px);
+        border-radius: 21px;
+        background: #fffdf7;
+        padding: 1rem 0.9rem;
+        box-sizing: border-box;
+        overflow: hidden;
     }
-    .tarjeta:hover {
-        border-color: #0f172a;
+
+    .notas {
+        flex: 1;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0 0.2rem;
+        border: 0;
+        outline: none;
+        resize: none;
+        background: transparent;
+        color: #3b2a1f;
+        font-family: "Poppins", system-ui, sans-serif;
+        font-size: 0.95rem;
+        font-weight: 500;
+        line-height: 2.05;
+        box-sizing: border-box;
+        scrollbar-width: thin;
+        scrollbar-color: #d9c3c4 transparent;
     }
-    .tarjeta-head {
+
+    .notas::placeholder {
+        color: #b3a49a;
+        font-weight: 400;
+        font-style: italic;
+    }
+
+    .notas::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .notas::-webkit-scrollbar-thumb {
+        background: #d9c3c4;
+        border-radius: 999px;
+    }
+
+    .estado-notas {
         display: flex;
         align-items: center;
-        gap: 0.8rem;
+        gap: 0.4rem;
+        min-height: 1.4rem;
+        margin: 0.5rem 0 0 0.35rem;
+        font-size: 0.72rem;
+        font-weight: 500;
+        color: #8c7a6c;
+        opacity: 0;
+        transition: opacity 200ms ease;
     }
-    .tarjeta-head > div {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
+
+    .estado-notas.visible {
+        opacity: 1;
     }
-    .tarjeta-head strong {
-        color: #0f172a;
-        font-size: 1rem;
-    }
-    .empresa {
-        color: #64748b;
-        font-size: 0.85rem;
-    }
-    .avatar {
-        width: 48px;
-        height: 48px;
+
+    .punto {
+        width: 6px;
+        height: 6px;
         border-radius: 50%;
-        background: #0f172a;
-        color: #fff;
-        display: grid;
-        place-items: center;
-        font-weight: 800;
-        font-size: 0.95rem;
+        background: #7fae8b;
         flex: 0 0 auto;
     }
-    .pill {
-        display: inline-block;
-        padding: 0.15rem 0.7rem;
+
+    .btn-regresar {
+        align-self: flex-start;
+        margin-top: auto;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.45rem 1.8rem 0.45rem 0.9rem;
         border-radius: 999px;
-        font-size: 0.75rem;
+        background: #6e0d0d;
+        color: #fff8ee;
+        text-decoration: none;
+        font-family: inherit;
+        font-size: 1.4rem;
         font-weight: 700;
-        white-space: nowrap;
+        line-height: 1;
+        box-shadow: 0 4px 10px rgba(92, 16, 17, 0.25);
+        transition:
+            background 160ms ease,
+            transform 160ms ease;
     }
-    .pill.ok {
-        background: #dcfce7;
-        color: #166534;
+
+    .btn-regresar:hover {
+        background: #581010;
+        transform: translateY(-1px);
     }
-    .pill.warn {
-        background: #fef9c3;
-        color: #854d0e;
+
+    .btn-regresar:focus-visible {
+        outline: 3px solid #b98b4e;
+        outline-offset: 3px;
     }
-    .pill.off {
-        background: #f1f5f9;
-        color: #64748b;
+
+    .btn-regresar-icono {
+        width: 26px;
+        height: 26px;
+        flex: 0 0 auto;
     }
-    .datos {
+
+    .contenido {
+        flex: 1;
+        min-width: 0;
         display: flex;
-        gap: 1.5rem;
-        margin: 0;
+        flex-direction: column;
+        padding-top: 0.25rem;
     }
-    .datos dt {
-        font-size: 0.8rem;
-        color: #64748b;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
+
+    .contenido h1 {
+        margin: 0 0 clamp(2rem, 5vh, 4rem);
+        text-align: center;
+        font-size: clamp(2.4rem, 5vw, 4.2rem);
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        line-height: 1.05;
+        color: #3b2118;
     }
-    .datos dd {
-        margin: 0.15rem 0 0;
-        font-weight: 700;
-        color: #0f172a;
+
+    .carpetas {
+        list-style: none;
+        margin: 0 auto;
+        padding: 0;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(140px, 175px));
+        justify-content: center;
+        gap: clamp(2.25rem, 5vh, 3.5rem) clamp(2.5rem, 6vw, 4.5rem);
+        width: 100%;
     }
-    .contacto {
-        margin: 0;
-        font-size: 0.9rem;
-        color: #0f172a;
+
+    .carpeta {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.85rem;
+        --frente-1: #f7edbb;
+        --frente-2: #ecdc95;
+        --pestana: #f6ecb6;
+        --borde: rgba(120, 100, 40, 0.22);
+    }
+
+    .carpeta.rosa {
+        --frente-1: #9b635c;
+        --frente-2: #804a45;
+        --pestana: #a56d66;
+        --borde: rgba(60, 25, 25, 0.25);
+    }
+
+    .carpeta.azul {
+        --frente-1: #d8ecf7;
+        --frente-2: #bedbee;
+        --pestana: #ddf1fb;
+        --borde: rgba(60, 100, 125, 0.2);
+    }
+
+    .carpeta.cafe {
+        --frente-1: #7d6759;
+        --frente-2: #5e4a3f;
+        --pestana: #886f60;
+        --borde: rgba(45, 30, 20, 0.3);
+    }
+
+    .carpeta-icono {
+        position: relative;
+        display: block;
+        width: 100%;
+        aspect-ratio: 1.4 / 1;
+        border-radius: 5px;
+        background: linear-gradient(
+            180deg,
+            var(--frente-1) 0%,
+            var(--frente-2) 100%
+        );
+        box-shadow:
+            inset 0 0 0 1px var(--borde),
+            inset 0 1px 0 rgba(255, 255, 255, 0.45),
+            0 6px 12px rgba(59, 33, 24, 0.14);
+        transition:
+            transform 220ms ease,
+            box-shadow 220ms ease;
+    }
+
+    .carpeta-icono::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        bottom: 100%;
+        width: 44%;
+        height: 18px;
+        border-radius: 7px 8px 0 0;
+        background: var(--pestana);
+        box-shadow:
+            inset 0 0 0 1px var(--borde),
+            inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    }
+
+    .carpeta-icono::after {
+        content: "";
+        position: absolute;
+        top: 6px;
+        left: 4%;
+        right: 4%;
+        height: 3px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.8);
+    }
+
+    .carpeta:hover .carpeta-icono {
+        transform: translateY(-5px);
+        box-shadow:
+            inset 0 0 0 1px var(--borde),
+            inset 0 1px 0 rgba(255, 255, 255, 0.45),
+            0 14px 22px rgba(59, 33, 24, 0.2);
+    }
+
+    .carpeta-nombre {
+        font-size: 0.98rem;
+        font-weight: 500;
+        text-align: center;
+        color: #3b2118;
         overflow-wrap: anywhere;
     }
-    .contacto.muted {
-        color: #64748b;
+
+    .adornos {
+        position: absolute;
+        right: clamp(1.5rem, 4vw, 3.5rem);
+        bottom: clamp(1.25rem, 3vw, 2.5rem);
+        display: flex;
+        align-items: flex-end;
+        gap: 0.35rem;
+        pointer-events: none;
     }
-    .sin-resultados {
-        text-align: center;
-        color: #64748b;
+
+    .asterisco {
+        display: block;
     }
-    @media (max-width: 640px) {
-        .cli {
-            padding: 1rem;
-        }
-        .cli-top {
+
+    .asterisco-azul {
+        width: 42px;
+        height: 42px;
+        color: #cbe5f4;
+        margin-bottom: 0.35rem;
+    }
+
+    .asterisco-vino {
+        width: 38px;
+        height: 38px;
+        color: #6e0d0d;
+    }
+
+    @media (max-width: 900px) {
+        .tablero {
             flex-direction: column;
-            align-items: flex-start;
+            gap: 2rem;
+            min-height: calc(100vh - 36px);
+            padding: 2rem 1.5rem 2rem;
         }
-        .cli-tools {
-            flex-direction: column;
-            align-items: stretch;
+
+        .contenido {
+            order: 1;
+        }
+
+        .panel-notas {
+            order: 2;
+            width: 100%;
+            min-height: 0;
+        }
+
+        .contenido h1 {
+            margin-bottom: 2rem;
+            font-size: clamp(2.2rem, 9vw, 3.2rem);
+        }
+
+        .notas-caja {
+            height: 280px;
+        }
+
+        .btn-regresar {
+            margin-top: 1.5rem;
+        }
+
+        .adornos {
+            display: none;
+        }
+    }
+
+    @media (max-width: 420px) {
+        .clientes {
+            padding: 10px;
+        }
+
+        .tablero {
+            min-height: calc(100vh - 20px);
+            border-radius: 24px;
+            padding: 1.5rem 1.1rem;
+        }
+
+        .carpetas {
+            grid-template-columns: minmax(0, 170px);
+            gap: 2rem;
+        }
+
+        .btn-regresar {
+            font-size: 1.2rem;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .carpeta-icono,
+        .btn-regresar,
+        .estado-notas {
+            transition: none;
         }
     }
 </style>

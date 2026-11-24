@@ -22,6 +22,7 @@ const {
         <meta name="description" content={description} />
         <meta property="og:locale" content="es_MX" />
         <title>{title}</title>
+        <slot name="head" />
     </head>
     <body>
         <CursorCarga />
