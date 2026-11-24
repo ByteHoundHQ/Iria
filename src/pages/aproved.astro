@@ -1,0 +1,679 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import GuardiaAuth from "../components/GuardiaAuth.astro";
+
+const ESTADOS = [
+    { id: "pendiente", etiqueta: "Pendiente", color: "#c7a052" },
+    { id: "revision", etiqueta: "Revisión", color: "#7c9fb5" },
+    { id: "aprobado", etiqueta: "Aprobado", color: "#6f8f6a" },
+    { id: "cambios", etiqueta: "En cambios", color: "#a2595a" },
+];
+
+const planogramas = [
+    {
+        id: "ibis-octubre",
+        planograma: "ibis Octubre",
+        cuenta: "ibis Cuu",
+        responsable: "Vanessa",
+        estado: "revision",
+    },
+    {
+        id: "bravar-octubre",
+        planograma: "Bravar Octubre",
+        cuenta: "BRAVAR",
+        responsable: "Vanessa",
+        estado: "aprobado",
+    },
+    {
+        id: "dega-octubre",
+        planograma: "Degá Octubre",
+        cuenta: "DEGÁ",
+        responsable: "Vanessa",
+        estado: "cambios",
+    },
+    {
+        id: "calesa-octubre",
+        planograma: "Calesa Octubre",
+        cuenta: "La Calesa",
+        responsable: "Vanessa",
+        estado: "pendiente",
+    },
+];
+
+const conteos = { pendiente: 0, revision: 0, aprobado: 0, cambios: 0 };
+planogramas.forEach((p) => {
+    if (p.estado in conteos) conteos[p.estado as keyof typeof conteos]++;
+});
+---
+
+<BaseLayout
+    title="Iria — Aprobación de planogramas"
+    description="Iria — Aprobación de planogramas por cliente."
+>
+    <link slot="head" rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+        slot="head"
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    />
+    <link
+        slot="head"
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"
+    />
+
+    <GuardiaAuth />
+
+    <main class="apr">
+        <section class="tablero">
+            <div class="contenido">
+                <h1>Aprobación de planogramas</h1>
+
+                <div class="resumen" aria-label="Resumen de aprobaciones">
+                    <article class="resumen-tarjeta">
+                        <span class="resumen-label">Pendientes</span>
+                        <strong id="n-pendiente" class="resumen-numero"
+                            >{conteos.pendiente}</strong
+                        >
+                    </article>
+                    <article class="resumen-tarjeta">
+                        <span class="resumen-label">En revisión</span>
+                        <strong id="n-revision" class="resumen-numero"
+                            >{conteos.revision}</strong
+                        >
+                    </article>
+                    <article class="resumen-tarjeta">
+                        <span class="resumen-label">Aprobados</span>
+                        <strong id="n-aprobado" class="resumen-numero"
+                            >{conteos.aprobado}</strong
+                        >
+                    </article>
+                </div>
+
+                <div class="tabla-envoltura">
+                    <table class="tabla">
+                        <thead>
+                            <tr>
+                                <th scope="col">Planograma</th>
+                                <th scope="col">Cuenta</th>
+                                <th scope="col">Responsable</th>
+                                <th scope="col">Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {
+                                planogramas.map((p) => (
+                                    <tr>
+                                        <td data-label="Planograma">
+                                            <span class="planograma">
+                                                {p.planograma}
+                                            </span>
+                                        </td>
+                                        <td data-label="Cuenta">{p.cuenta}</td>
+                                        <td data-label="Responsable">
+                                            {p.responsable}
+                                        </td>
+                                        <td data-label="Estado">
+                                            <span class="estado-control">
+                                                <span
+                                                    class="estado-punto"
+                                                    aria-hidden="true"
+                                                />
+                                                <select
+                                                    class="estado-select"
+                                                    data-id={p.id}
+                                                    aria-label={`Estado de ${p.planograma}`}
+                                                >
+                                                    {ESTADOS.map((e) => (
+                                                        <option
+                                                            value={e.id}
+                                                            data-color={
+                                                                e.color
+                                                            }
+                                                            selected={
+                                                                p.estado ===
+                                                                e.id
+                                                            }
+                                                        >
+                                                            {e.etiqueta}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                                <svg
+                                                    class="estado-flecha"
+                                                    viewBox="0 0 24 24"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    stroke-width="2.2"
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    aria-hidden="true"
+                                                >
+                                                    <path d="m6 9 6 6 6-6" />
+                                                </svg>
+                                            </span>
+                                        </td>
+                                    </tr>
+                                ))
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <a
+                href="/ind_1"
+                id="boton-volver"
+                class="btn-regresar"
+                data-astro-prefetch="viewport"
+                data-cursor-carga
+            >
+                <svg
+                    class="btn-regresar-icono"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                >
+                    <path d="M15 5 8 12l7 7"></path>
+                </svg>
+                Regresar
+            </a>
+
+            <div class="adornos" aria-hidden="true">
+                <svg
+                    class="asterisco asterisco-azul"
+                    viewBox="0 0 100 100"
+                    fill="currentColor"
+                >
+                    {Array.from({ length: 8 }).map((_, i) => (
+                        <ellipse
+                            cx="50"
+                            cy="23"
+                            rx="8.5"
+                            ry="23"
+                            transform={`rotate(${i * 45} 50 50)`}
+                        />
+                    ))}
+                </svg>
+                <svg
+                    class="asterisco asterisco-vino"
+                    viewBox="0 0 100 100"
+                    fill="currentColor"
+                >
+                    {Array.from({ length: 8 }).map((_, i) => (
+                        <ellipse
+                            cx="50"
+                            cy="23"
+                            rx="9"
+                            ry="24"
+                            transform={`rotate(${i * 45} 50 50)`}
+                        />
+                    ))}
+                </svg>
+            </div>
+        </section>
+    </main>
+</BaseLayout>
+
+<script>
+    const CLAVE_ESTADOS = "iria.aprobaciones.estados";
+    const CLAVES_VALIDAS = ["pendiente", "revision", "aprobado", "cambios"];
+
+    const selects = Array.from(
+        document.querySelectorAll<HTMLSelectElement>(".estado-select"),
+    );
+
+    function leerEstados(): Record<string, string> {
+        try {
+            const crudo = JSON.parse(
+                window.localStorage.getItem(CLAVE_ESTADOS) ?? "{}",
+            );
+            if (!crudo || typeof crudo !== "object") return {};
+            const limpio: Record<string, string> = {};
+            for (const [id, valor] of Object.entries(crudo)) {
+                if (
+                    typeof valor === "string" &&
+                    CLAVES_VALIDAS.includes(valor)
+                ) {
+                    limpio[id] = valor;
+                }
+            }
+            return limpio;
+        } catch {
+            return {};
+        }
+    }
+
+    function guardarEstados(estados: Record<string, string>) {
+        try {
+            window.localStorage.setItem(CLAVE_ESTADOS, JSON.stringify(estados));
+        } catch {
+            /* sin almacenamiento disponible */
+        }
+    }
+
+    function pintarPunto(select: HTMLSelectElement) {
+        const opcion = select.selectedOptions[0];
+        const color = opcion?.dataset.color ?? "#3b2118";
+        select.parentElement?.style.setProperty("--c", color);
+        select.dataset.estado = select.value;
+    }
+
+    function actualizarConteos() {
+        const conteos: Record<string, number> = {
+            pendiente: 0,
+            revision: 0,
+            aprobado: 0,
+        };
+        selects.forEach((select) => {
+            if (select.value in conteos) conteos[select.value]++;
+        });
+        (
+            document.getElementById("n-pendiente") as HTMLElement | null
+        )?.replaceChildren(String(conteos.pendiente));
+        (
+            document.getElementById("n-revision") as HTMLElement | null
+        )?.replaceChildren(String(conteos.revision));
+        (
+            document.getElementById("n-aprobado") as HTMLElement | null
+        )?.replaceChildren(String(conteos.aprobado));
+    }
+
+    const estados = leerEstados();
+
+    selects.forEach((select) => {
+        const id = select.dataset.id ?? "";
+        const guardado = estados[id];
+        if (guardado && CLAVES_VALIDAS.includes(guardado)) {
+            select.value = guardado;
+        }
+        pintarPunto(select);
+
+        select.addEventListener("change", () => {
+            if (CLAVES_VALIDAS.includes(select.value)) {
+                estados[id] = select.value;
+            } else {
+                delete estados[id];
+            }
+            guardarEstados(estados);
+            pintarPunto(select);
+            actualizarConteos();
+        });
+    });
+
+    actualizarConteos();
+</script>
+
+<style>
+    .apr {
+        min-height: 100vh;
+        box-sizing: border-box;
+        padding: 18px;
+        background: #5c1011;
+        display: flex;
+        width: 100%;
+        margin: 0;
+        font-family: "Poppins", system-ui, sans-serif;
+        color: #3b2118;
+    }
+
+    .tablero {
+        position: relative;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        box-sizing: border-box;
+        width: 100%;
+        min-height: calc(100vh - 36px);
+        padding: clamp(1.75rem, 3.2vw, 2.75rem) clamp(1.5rem, 3.2vw, 3rem)
+            clamp(1.5rem, 2.6vw, 2.25rem);
+        border-radius: 30px;
+        background: #fbf9f0;
+        box-shadow: 0 22px 45px rgba(30, 3, 3, 0.35);
+        overflow: hidden;
+    }
+
+    .contenido {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        max-width: 1080px;
+        margin: 0 auto;
+    }
+
+    .contenido h1 {
+        margin: 0.25rem 0 0;
+        text-align: center;
+        font-size: clamp(1.05rem, 1.75vw, 1.4rem);
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+        color: #3b2118;
+    }
+
+    .resumen {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: clamp(0.9rem, 2.5vw, 1.75rem);
+        margin: clamp(1.5rem, 3.5vh, 2.4rem) auto clamp(2rem, 4.5vh, 3rem);
+        width: 100%;
+    }
+
+    .resumen-tarjeta {
+        flex: 1 1 150px;
+        max-width: 200px;
+        min-height: 96px;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.35rem;
+        padding: 1rem 1.1rem;
+        border-radius: 16px;
+        background: #fffdf7;
+        box-shadow: 0 4px 12px rgba(59, 33, 24, 0.08);
+    }
+
+    .resumen-label {
+        font-size: 0.8rem;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+        color: #3b2118;
+        text-align: center;
+    }
+
+    .resumen-numero {
+        font-size: 1.5rem;
+        font-weight: 700;
+        line-height: 1;
+        color: #6e0d0d;
+    }
+
+    .tabla-envoltura {
+        width: 100%;
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .tabla {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+    }
+
+    .tabla th {
+        padding: 0.4rem 0.75rem 1.25rem;
+        text-align: left;
+        font-size: clamp(1rem, 1.5vw, 1.22rem);
+        font-weight: 700;
+        color: #3b2118;
+    }
+
+    .tabla th:nth-child(1) {
+        width: 31%;
+    }
+
+    .tabla th:nth-child(2) {
+        width: 25%;
+    }
+
+    .tabla th:nth-child(3) {
+        width: 21%;
+    }
+
+    .tabla th:nth-child(4) {
+        width: 23%;
+    }
+
+    .tabla td {
+        padding: 0.8rem 0.75rem;
+        font-size: clamp(0.95rem, 1.3vw, 1.1rem);
+        font-weight: 500;
+        color: #3b2118;
+        overflow-wrap: anywhere;
+        vertical-align: middle;
+    }
+
+    .tabla tbody tr {
+        transition: background 150ms ease;
+    }
+
+    .tabla tbody tr:hover {
+        background: #f7eede;
+    }
+
+    .planograma {
+        font-weight: 500;
+    }
+
+    .estado-control {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        width: 100%;
+        max-width: 190px;
+        border-radius: 10px;
+        --c: #c7a052;
+    }
+
+    .estado-punto {
+        position: absolute;
+        left: 0.55rem;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--c);
+        pointer-events: none;
+        box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+    }
+
+    .estado-select {
+        appearance: none;
+        -webkit-appearance: none;
+        width: 100%;
+        box-sizing: border-box;
+        padding: 0.32rem 1.7rem 0.32rem 1.4rem;
+        border: 1px solid transparent;
+        border-radius: 10px;
+        background: transparent;
+        color: #3b2118;
+        font-family: inherit;
+        font-size: inherit;
+        font-weight: 500;
+        cursor: pointer;
+        transition:
+            background 150ms ease,
+            border-color 150ms ease;
+    }
+
+    .estado-select:hover {
+        background: #f2e7d3;
+        border-color: #e6d7bd;
+    }
+
+    .estado-select:focus-visible {
+        outline: 2px solid #6e0d0d;
+        outline-offset: 1px;
+    }
+
+    .estado-flecha {
+        position: absolute;
+        right: 0.4rem;
+        width: 14px;
+        height: 14px;
+        color: #9b8878;
+        pointer-events: none;
+    }
+
+    .btn-regresar {
+        align-self: flex-start;
+        margin-top: clamp(1.5rem, 4vh, 2.75rem);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.45rem 1.8rem 0.45rem 0.9rem;
+        border-radius: 999px;
+        background: #6e0d0d;
+        color: #fff8ee;
+        text-decoration: none;
+        font-size: 1.3rem;
+        font-weight: 700;
+        line-height: 1;
+        box-shadow: 0 4px 10px rgba(92, 16, 17, 0.25);
+        transition:
+            background 160ms ease,
+            transform 160ms ease;
+    }
+
+    .btn-regresar:hover {
+        background: #581010;
+        transform: translateY(-1px);
+    }
+
+    .btn-regresar:focus-visible {
+        outline: 3px solid #b98b4e;
+        outline-offset: 3px;
+    }
+
+    .btn-regresar-icono {
+        width: 24px;
+        height: 24px;
+        flex: 0 0 auto;
+    }
+
+    .adornos {
+        position: absolute;
+        right: clamp(1.5rem, 3.5vw, 3rem);
+        bottom: clamp(1.25rem, 2.5vw, 2rem);
+        display: flex;
+        align-items: flex-end;
+        gap: 0.35rem;
+        pointer-events: none;
+    }
+
+    .asterisco {
+        display: block;
+    }
+
+    .asterisco-azul {
+        width: 42px;
+        height: 42px;
+        color: #cbe5f4;
+        margin-bottom: 0.35rem;
+    }
+
+    .asterisco-vino {
+        width: 38px;
+        height: 38px;
+        color: #6e0d0d;
+    }
+
+    @media (max-width: 720px) {
+        .apr {
+            padding: 10px;
+        }
+
+        .tablero {
+            border-radius: 24px;
+            padding: 1.5rem 1.1rem 1.75rem;
+            min-height: calc(100vh - 20px);
+        }
+
+        .resumen {
+            margin: 1.4rem auto 1.75rem;
+            flex-wrap: nowrap;
+            gap: 0.55rem;
+        }
+
+        .resumen-tarjeta {
+            flex: 1 1 0;
+            min-width: 0;
+            max-width: none;
+            min-height: 78px;
+            padding: 0.7rem 0.35rem;
+        }
+
+        .resumen-label {
+            font-size: 0.6rem;
+            letter-spacing: 0;
+        }
+
+        .resumen-numero {
+            font-size: 1.25rem;
+        }
+
+        .tabla thead {
+            display: none;
+        }
+
+        .tabla,
+        .tabla tbody,
+        .tabla tr,
+        .tabla td {
+            display: block;
+            width: 100%;
+        }
+
+        .tabla tbody tr {
+            box-sizing: border-box;
+            margin-bottom: 0.75rem;
+            padding: 0.7rem 0.9rem;
+            border: 1px solid #eee1cd;
+            border-radius: 14px;
+            background: #fffdf7;
+        }
+
+        .tabla td {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 0.3rem 0;
+            font-size: 0.92rem;
+        }
+
+        .tabla td::before {
+            content: attr(data-label);
+            flex: 0 0 auto;
+            font-size: 0.66rem;
+            font-weight: 700;
+            letter-spacing: 0.07em;
+            text-transform: uppercase;
+            color: #a08d7c;
+        }
+
+        .estado-control {
+            width: auto;
+            max-width: none;
+        }
+
+        .estado-select {
+            width: auto;
+        }
+
+        .adornos {
+            display: none;
+        }
+
+        .btn-regresar {
+            font-size: 1.15rem;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .tabla tbody tr,
+        .estado-select,
+        .btn-regresar {
+            transition: none;
+        }
+    }
+</style>
