@@ -1,6 +1,7 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import GuardiaAuth from "../components/GuardiaAuth.astro";
+import { MIEMBROS } from "../lib/calendario";
 ---
 
 <BaseLayout title="Iria — Calendario" description="Iria — Calendario de pendientes.">
@@ -187,15 +188,35 @@ import GuardiaAuth from "../components/GuardiaAuth.astro";
                             </span>
                         </label>
                     </div>
-                    <label class="campo">
-                        Tipo de pendiente
-                        <select id="f-tipo">
-                            <option value="parrilla">Pendiente de parrilla</option>
-                            <option value="subir">Por subir</option>
-                            <option value="imagen">Creación de imagen</option>
-                            <option value="nota" selected>Nota</option>
-                        </select>
-                    </label>
+                    <div class="renglon">
+                        <label class="campo">
+                            Tipo de pendiente
+                            <select id="f-tipo">
+                                <option value="parrilla">Pendiente de parrilla</option>
+                                <option value="subir">Por subir</option>
+                                <option value="imagen">Creación de imagen</option>
+                                <option value="nota" selected>Nota</option>
+                            </select>
+                        </label>
+                        <label class="campo">
+                            Asignar a
+                            <span class="selector-cal">
+                                <span
+                                    id="f-asignado-punto"
+                                    class="punto-cal punto-miembro"
+                                    aria-hidden="true"
+                                ></span>
+                                <select id="f-asignado">
+                                    <option value="">Sin asignar</option>
+                                    {MIEMBROS.map((m) => (
+                                        <option value={m.id} data-color={m.color}>
+                                            {m.nombre}
+                                        </option>
+                                    ))}
+                                </select>
+                            </span>
+                        </label>
+                    </div>
                     <label class="campo">
                         Título
                         <input
@@ -233,146 +254,27 @@ import GuardiaAuth from "../components/GuardiaAuth.astro";
 </BaseLayout>
 
 <script>
-    const CALENDARIOS = [
-        { id: "importante", nombre: "Importante", color: "#6e0d0d" },
-        { id: "bravar", nombre: "Bravar", color: "#a9cfe4" },
-        { id: "dega", nombre: "Degá", color: "#5f4a3f" },
-        { id: "calesa", nombre: "Calesa", color: "#96605a" },
-        { id: "ibis", nombre: "Ibis", color: "#e9d583" },
-    ];
-    const POR_ID = Object.fromEntries(
-        CALENDARIOS.map((c) => [c.id, c]),
-    ) as Record<string, { id: string; nombre: string; color: string }>;
+    import {
+        CALENDARIOS,
+        MESES,
+        POR_CALENDARIO,
+        POR_MIEMBRO,
+        TIPOS,
+        crearSemillas,
+        guardarNotas,
+        leerNotas,
+    } from "../lib/calendario";
 
-    const MESES = [
-        "Enero",
-        "Febrero",
-        "Marzo",
-        "Abril",
-        "Mayo",
-        "Junio",
-        "Julio",
-        "Agosto",
-        "Septiembre",
-        "Octubre",
-        "Noviembre",
-        "Diciembre",
-    ];
-    const TIPOS: Record<string, string> = {
-        parrilla: "Parrilla",
-        subir: "Por subir",
-        imagen: "Imagen",
-        nota: "Nota",
-    };
-
-    const KEY = "iria_calendar_notas";
     const KEY_OCULTOS = "iria_calendar_calendarios_ocultos";
+    const porCalendario = POR_CALENDARIO;
+    const porMiembro = POR_MIEMBRO;
 
     const hoy = new Date();
     const pad = (n: number) => String(n).padStart(2, "0");
     const aFecha = (d: Date) =>
         `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 
-    const baseY = hoy.getFullYear();
-    const baseM = hoy.getMonth();
-    const enMes = (dia: number) =>
-        `${baseY}-${pad(baseM + 1)}-${pad(dia)}`;
-
-    const semillas = [
-        {
-            fecha: enMes(3),
-            calendario: "importante",
-            tipo: "nota",
-            titulo: "Entrega de reporte mensual",
-        },
-        {
-            fecha: enMes(3),
-            calendario: "ibis",
-            tipo: "parrilla",
-            titulo: "Parrilla Ibis Chihuahua",
-        },
-        {
-            fecha: enMes(5),
-            calendario: "bravar",
-            tipo: "subir",
-            titulo: "Subir 2 reels Bravar",
-        },
-        {
-            fecha: enMes(6),
-            calendario: "calesa",
-            tipo: "imagen",
-            titulo: "Sesión de fotos Calesa",
-        },
-        {
-            fecha: enMes(8),
-            calendario: "dega",
-            tipo: "nota",
-            titulo: "Llamar a Degá",
-        },
-        {
-            fecha: enMes(10),
-            calendario: "importante",
-            tipo: "nota",
-            titulo: "Confirmar junta con clientes",
-        },
-        {
-            fecha: enMes(10),
-            calendario: "ibis",
-            tipo: "imagen",
-            titulo: "Crear 4 banners Ibis",
-        },
-        {
-            fecha: enMes(12),
-            calendario: "bravar",
-            tipo: "parrilla",
-            titulo: "Aprobar parrilla Bravar",
-        },
-        {
-            fecha: enMes(14),
-            calendario: "calesa",
-            tipo: "nota",
-            titulo: "Enviar factura Calesa",
-        },
-        {
-            fecha: enMes(17),
-            calendario: "dega",
-            tipo: "subir",
-            titulo: "Subir menú Degá",
-        },
-        {
-            fecha: enMes(20),
-            calendario: "importante",
-            tipo: "nota",
-            titulo: "Revisión de cuentas",
-        },
-        {
-            fecha: enMes(22),
-            calendario: "ibis",
-            tipo: "parrilla",
-            titulo: "Parrilla semanal Ibis",
-        },
-        {
-            fecha: enMes(24),
-            calendario: "bravar",
-            tipo: "imagen",
-            titulo: "Portada Bravar",
-        },
-        {
-            fecha: enMes(26),
-            calendario: "calesa",
-            tipo: "subir",
-            titulo: "Subir carrusel Calesa",
-        },
-    ];
-
-    type Evento = {
-        id?: string;
-        fecha: string;
-        calendario: string;
-        tipo: string;
-        titulo: string;
-        detalle?: string;
-    };
+    const semillas = crearSemillas();
 
     const estado = {
         y: hoy.getFullYear(),
@@ -391,34 +293,17 @@ import GuardiaAuth from "../components/GuardiaAuth.astro";
     const fCalendario = document.getElementById(
         "f-calendario",
     ) as HTMLSelectElement | null;
+    const fAsignado = document.getElementById(
+        "f-asignado",
+    ) as HTMLSelectElement | null;
     const fCalPunto = document.getElementById("f-cal-punto");
-
-    function leerNotas(): Evento[] {
-        try {
-            const crudo = JSON.parse(localStorage.getItem(KEY) ?? "[]");
-            if (!Array.isArray(crudo)) return [];
-            return crudo
-                .filter((n) => n && n.fecha && n.titulo)
-                .map((n) => ({
-                    ...n,
-                    calendario: POR_ID[n.calendario] ? n.calendario : "importante",
-                }));
-        } catch {
-            return [];
-        }
-    }
-
-    function guardarNotas(notas: Evento[]) {
-        try {
-            localStorage.setItem(KEY, JSON.stringify(notas));
-        } catch {
-            /* sin almacenamiento disponible */
-        }
-    }
+    const fAsignadoPunto = document.getElementById("f-asignado-punto");
 
     function leerOcultos(): Set<string> {
         try {
-            const crudo = JSON.parse(localStorage.getItem(KEY_OCULTOS) ?? "[]");
+            const crudo = JSON.parse(
+                window.localStorage.getItem(KEY_OCULTOS) ?? "[]",
+            );
             return new Set(Array.isArray(crudo) ? crudo : []);
         } catch {
             return new Set();
@@ -427,20 +312,25 @@ import GuardiaAuth from "../components/GuardiaAuth.astro";
 
     function guardarOcultos() {
         try {
-            localStorage.setItem(KEY_OCULTOS, JSON.stringify([...ocultos]));
+            window.localStorage.setItem(
+                KEY_OCULTOS,
+                JSON.stringify([...ocultos]),
+            );
         } catch {
             /* sin almacenamiento disponible */
         }
     }
 
     const ocultos = leerOcultos();
-    const todosSinFiltro = (): Evento[] => [...semillas, ...leerNotas()];
-    const todos = (): Evento[] =>
+    const todosSinFiltro = () => [...semillas, ...leerNotas()];
+    const todos = () =>
         todosSinFiltro().filter((e) => !ocultos.has(e.calendario));
     const eventosDel = (fecha: string) =>
         todos().filter((e) => e.fecha === fecha);
     const contarCalendario = (id: string) =>
         todosSinFiltro().filter((e) => e.calendario === id).length;
+    const miembroDe = (id?: string) =>
+        id ? porMiembro[id] : undefined;
 
     function pintarCalendarios() {
         if (!listaCalendarios) return;
@@ -453,7 +343,10 @@ import GuardiaAuth from "../components/GuardiaAuth.astro";
             const input = document.createElement("input");
             input.type = "checkbox";
             input.checked = !ocultos.has(c.id);
-            input.setAttribute("aria-label", `Mostrar el calendario ${c.nombre}`);
+            input.setAttribute(
+                "aria-label",
+                `Mostrar el calendario ${c.nombre}`,
+            );
 
             const marca = document.createElement("span");
             marca.className = "marca";
@@ -517,7 +410,7 @@ import GuardiaAuth from "../components/GuardiaAuth.astro";
             const puntos = document.createElement("span");
             puntos.className = "puntos";
             evs.slice(0, 3).forEach((e) => {
-                const cal = POR_ID[e.calendario] ?? POR_ID.importante;
+                const cal = porCalendario[e.calendario] ?? porCalendario.importante;
                 const p = document.createElement("span");
                 p.className = "punto";
                 p.style.setProperty("--c", cal.color);
@@ -533,10 +426,13 @@ import GuardiaAuth from "../components/GuardiaAuth.astro";
 
             const resumen = evs.length
                 ? evs
-                      .map(
-                          (e) =>
-                              `${e.titulo} · ${(POR_ID[e.calendario] ?? POR_ID.importante).nombre}`,
-                      )
+                      .map((e) => {
+                          const cal =
+                              porCalendario[e.calendario] ??
+                              porCalendario.importante;
+                          const miembro = miembroDe(e.asignado);
+                          return `${e.titulo} · ${cal.nombre}${miembro ? ` · ${miembro.nombre}` : ""}`;
+                      })
                       .join("\n")
                 : "Día libre";
             b.title = resumen;
@@ -574,8 +470,7 @@ import GuardiaAuth from "../components/GuardiaAuth.astro";
         listaDia.innerHTML = "";
         if (!evs.length) {
             const hayOcultos = todosSinFiltro().some(
-                (e) =>
-                    e.fecha === estado.sel && ocultos.has(e.calendario),
+                (e) => e.fecha === estado.sel && ocultos.has(e.calendario),
             );
             const li = document.createElement("li");
             li.className = "vacio-msg";
@@ -588,7 +483,8 @@ import GuardiaAuth from "../components/GuardiaAuth.astro";
 
         const notas = leerNotas();
         evs.forEach((e) => {
-            const cal = POR_ID[e.calendario] ?? POR_ID.importante;
+            const cal = porCalendario[e.calendario] ?? porCalendario.importante;
+            const miembro = miembroDe(e.asignado);
             const li = document.createElement("li");
             li.className = "item";
             li.style.setProperty("--c", cal.color);
@@ -608,6 +504,14 @@ import GuardiaAuth from "../components/GuardiaAuth.astro";
             meta.textContent = `${cal.nombre} · ${TIPOS[e.tipo] ?? e.tipo}`;
 
             texto.append(tituloItem, meta);
+
+            if (miembro) {
+                const asignado = document.createElement("span");
+                asignado.className = "item-asignado";
+                asignado.style.setProperty("--c", miembro.color);
+                asignado.textContent = `Asignado a ${miembro.nombre}`;
+                texto.appendChild(asignado);
+            }
 
             if (e.detalle) {
                 const det = document.createElement("span");
@@ -640,14 +544,24 @@ import GuardiaAuth from "../components/GuardiaAuth.astro";
 
     function actualizarPuntoCalendario() {
         if (!fCalendario || !fCalPunto) return;
-        const cal = POR_ID[fCalendario.value] ?? POR_ID.importante;
+        const cal = porCalendario[fCalendario.value] ?? porCalendario.importante;
         fCalPunto.style.setProperty("--c", cal.color);
+    }
+
+    function actualizarPuntoAsignado() {
+        if (!fAsignado || !fAsignadoPunto) return;
+        const miembro = miembroDe(fAsignado.value);
+        fAsignadoPunto.style.setProperty(
+            "--c",
+            miembro ? miembro.color : "#cbb8a4",
+        );
     }
 
     function abrirModal() {
         modal?.removeAttribute("hidden");
         if (fFecha) fFecha.value = estado.sel;
         actualizarPuntoCalendario();
+        actualizarPuntoAsignado();
         (document.getElementById("f-titulo") as HTMLInputElement | null)?.focus();
     }
 
@@ -682,7 +596,9 @@ import GuardiaAuth from "../components/GuardiaAuth.astro";
     });
 
     document.getElementById("btn-nota")?.addEventListener("click", abrirModal);
-    document.getElementById("btn-cancelar")?.addEventListener("click", cerrarModal);
+    document
+        .getElementById("btn-cancelar")
+        ?.addEventListener("click", cerrarModal);
 
     modal?.addEventListener("click", (e) => {
         if (e.target === modal) cerrarModal();
@@ -693,6 +609,7 @@ import GuardiaAuth from "../components/GuardiaAuth.astro";
     });
 
     fCalendario?.addEventListener("change", actualizarPuntoCalendario);
+    fAsignado?.addEventListener("change", actualizarPuntoAsignado);
 
     form?.addEventListener("submit", (e) => {
         e.preventDefault();
@@ -702,6 +619,8 @@ import GuardiaAuth from "../components/GuardiaAuth.astro";
             document.getElementById("f-calendario") as HTMLSelectElement
         ).value;
         const tipo = (document.getElementById("f-tipo") as HTMLSelectElement)
+            .value;
+        const asignado = (document.getElementById("f-asignado") as HTMLSelectElement)
             .value;
         const tituloN = (
             document.getElementById("f-titulo") as HTMLInputElement
@@ -717,6 +636,7 @@ import GuardiaAuth from "../components/GuardiaAuth.astro";
             fecha,
             calendario,
             tipo,
+            asignado,
             titulo: tituloN,
             detalle,
         });
@@ -1075,6 +995,24 @@ import GuardiaAuth from "../components/GuardiaAuth.astro";
         overflow-wrap: anywhere;
     }
 
+    .item-asignado {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-size: 0.7rem;
+        font-weight: 500;
+        color: #7d6553;
+    }
+
+    .item-asignado::before {
+        content: "";
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--c, #cbb8a4);
+        box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12);
+    }
+
     .btn-del {
         flex: 0 0 auto;
         display: grid;
@@ -1409,7 +1347,7 @@ import GuardiaAuth from "../components/GuardiaAuth.astro";
         width: 16px;
         height: 16px;
         border-radius: 50%;
-        background: var(--c, #6e0d0d);
+        background: var(--c, #cbb8a4);
         box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.14);
     }
 

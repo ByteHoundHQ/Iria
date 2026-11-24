@@ -7,6 +7,7 @@ const RUTAS_PROTEGIDAS = [
     "/client",
     "/calendar",
     "/aproved",
+    "/equipo",
     "/upload",
     "/reportes",
     "/ind_1",

@@ -1,0 +1,581 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import GuardiaAuth from "../components/GuardiaAuth.astro";
+import {
+    MIEMBROS,
+    POR_MIEMBRO,
+    crearSemillas,
+    formatearFechaCorta,
+} from "../lib/calendario";
+
+const iniciales = crearSemillas()
+    .filter((e) => e.asignado && POR_MIEMBRO[e.asignado])
+    .sort((a, b) => a.fecha.localeCompare(b.fecha))
+    .map((e) => ({ ...e, miembro: POR_MIEMBRO[e.asignado ?? ""] }));
+---
+
+<BaseLayout title="Iria — Equipo" description="Iria — Equipo y pendientes asignados.">
+    <link slot="head" rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+        slot="head"
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    />
+    <link
+        slot="head"
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"
+    />
+
+    <GuardiaAuth />
+
+    <main class="eq">
+        <section class="tablero">
+            <div class="equipo">
+                <h1>Tu equipo</h1>
+                <ul class="miembros">
+                    {
+                        MIEMBROS.map((m) => (
+                            <li>
+                                <button
+                                    type="button"
+                                    class="miembro"
+                                    data-miembro={m.id}
+                                    aria-pressed="false"
+                                    title={`Ver pendientes de ${m.nombre}`}
+                                >
+                                    <span
+                                        class="miembro-circulo"
+                                        style={`--c:${m.color}`}
+                                        aria-hidden="true"
+                                    />
+                                    <span class="miembro-nombre">
+                                        {m.nombre}
+                                    </span>
+                                </button>
+                            </li>
+                        ))
+                    }
+                </ul>
+            </div>
+
+            <div class="col-pendientes">
+                <h2>Sus pendientes</h2>
+                <div class="panel">
+                    <div class="panel-interior">
+                        <ul id="lista-pendientes" class="pendientes">
+                            {
+                                iniciales.map((e) => (
+                                    <li class="pendiente" data-miembro={e.asignado}>
+                                        <span class="pendiente-titulo">
+                                            {e.titulo}
+                                        </span>
+                                        <span class="puntos">
+                                            <span
+                                                class="punto"
+                                                style={`--c:${e.miembro.color}`}
+                                                title={e.miembro.nombre}
+                                            />
+                                        </span>
+                                        <span class="pendiente-fecha">
+                                            {formatearFechaCorta(e.fecha)}
+                                        </span>
+                                    </li>
+                                ))
+                            }
+                        </ul>
+                        <p id="sin-pendientes" class="sin-pendientes" hidden>
+                            No hay pendientes asignados por ahora.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <a
+                href="/ind_1"
+                id="boton-volver"
+                class="btn-regresar"
+                data-astro-prefetch="viewport"
+                data-cursor-carga
+            >
+                <svg
+                    class="btn-regresar-icono"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                >
+                    <path d="M15 5 8 12l7 7"></path>
+                </svg>
+                Regresar
+            </a>
+
+            <div class="adornos" aria-hidden="true">
+                <svg
+                    class="asterisco asterisco-azul"
+                    viewBox="0 0 100 100"
+                    fill="currentColor"
+                >
+                    {Array.from({ length: 8 }).map((_, i) => (
+                        <ellipse
+                            cx="50"
+                            cy="23"
+                            rx="8.5"
+                            ry="23"
+                            transform={`rotate(${i * 45} 50 50)`}
+                        />
+                    ))}
+                </svg>
+                <svg
+                    class="asterisco asterisco-vino"
+                    viewBox="0 0 100 100"
+                    fill="currentColor"
+                >
+                    {Array.from({ length: 8 }).map((_, i) => (
+                        <ellipse
+                            cx="50"
+                            cy="23"
+                            rx="9"
+                            ry="24"
+                            transform={`rotate(${i * 45} 50 50)`}
+                        />
+                    ))}
+                </svg>
+            </div>
+        </section>
+    </main>
+</BaseLayout>
+
+<script>
+    import {
+        POR_MIEMBRO,
+        crearSemillas,
+        formatearFechaCorta,
+        leerNotas,
+    } from "../lib/calendario";
+
+    const lista = document.getElementById("lista-pendientes");
+    const vacio = document.getElementById("sin-pendientes");
+    const botones = Array.from(
+        document.querySelectorAll<HTMLButtonElement>(".miembro"),
+    );
+
+    let filtro = "";
+
+    function pendientes() {
+        return [...crearSemillas(), ...leerNotas()]
+            .filter((e) => e.asignado && POR_MIEMBRO[e.asignado])
+            .sort((a, b) => a.fecha.localeCompare(b.fecha));
+    }
+
+    function pintar() {
+        if (!lista) return;
+        const eventos = pendientes().filter(
+            (e) => !filtro || e.asignado === filtro,
+        );
+
+        lista.innerHTML = "";
+        vacio?.toggleAttribute("hidden", eventos.length > 0);
+
+        eventos.forEach((e) => {
+            const miembro = POR_MIEMBRO[e.asignado ?? ""];
+            if (!miembro) return;
+
+            const li = document.createElement("li");
+            li.className = "pendiente";
+            li.dataset.miembro = miembro.id;
+
+            const titulo = document.createElement("span");
+            titulo.className = "pendiente-titulo";
+            titulo.textContent = e.titulo;
+
+            const puntos = document.createElement("span");
+            puntos.className = "puntos";
+            const punto = document.createElement("span");
+            punto.className = "punto";
+            punto.style.setProperty("--c", miembro.color);
+            punto.title = miembro.nombre;
+            puntos.appendChild(punto);
+
+            const fecha = document.createElement("span");
+            fecha.className = "pendiente-fecha";
+            fecha.textContent = formatearFechaCorta(e.fecha);
+
+            li.append(titulo, puntos, fecha);
+            li.title = `${e.titulo} · ${miembro.nombre} · ${formatearFechaCorta(e.fecha)}`;
+            lista.appendChild(li);
+        });
+    }
+
+    botones.forEach((boton) => {
+        boton.addEventListener("click", () => {
+            const id = boton.dataset.miembro ?? "";
+            filtro = filtro === id ? "" : id;
+            botones.forEach((b) => {
+                const activo = b.dataset.miembro === filtro;
+                b.classList.toggle("activo", activo);
+                b.setAttribute("aria-pressed", String(activo));
+            });
+            pintar();
+        });
+    });
+
+    // Mantener la vista al día si se agregan pendientes desde el calendario.
+    window.addEventListener("focus", pintar);
+    window.addEventListener("storage", pintar);
+
+    pintar();
+</script>
+
+<style is:global>
+    .eq {
+        min-height: 100vh;
+        box-sizing: border-box;
+        padding: 18px;
+        background: #5c1011;
+        display: flex;
+        width: 100%;
+        margin: 0;
+        font-family: "Poppins", system-ui, sans-serif;
+        color: #3b2118;
+    }
+
+    .tablero {
+        position: relative;
+        flex: 1;
+        display: grid;
+        grid-template-columns: minmax(240px, 0.82fr) minmax(0, 1.28fr);
+        grid-template-rows: 1fr auto;
+        column-gap: clamp(2rem, 4.5vw, 4.5rem);
+        row-gap: clamp(1.25rem, 2.4vw, 2rem);
+        box-sizing: border-box;
+        width: 100%;
+        min-height: calc(100vh - 36px);
+        padding: clamp(1.75rem, 3.2vw, 2.75rem) clamp(1.5rem, 3.2vw, 3rem)
+            clamp(1.5rem, 2.6vw, 2.25rem);
+        border-radius: 30px;
+        background: #fbf9f0;
+        box-shadow: 0 22px 45px rgba(30, 3, 3, 0.35);
+        overflow: hidden;
+    }
+
+    .equipo {
+        grid-column: 1;
+        grid-row: 1;
+        padding-top: clamp(0.5rem, 2vh, 1.5rem);
+        min-width: 0;
+    }
+
+    .equipo h1 {
+        margin: 0 0 clamp(1.35rem, 3.5vh, 2.35rem);
+        font-size: clamp(1.85rem, 2.9vw, 2.5rem);
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        color: #3b2118;
+    }
+
+    .miembros {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: clamp(0.75rem, 2.4vh, 1.15rem);
+    }
+
+    .miembro {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        width: 100%;
+        padding: 0.32rem 0.6rem 0.32rem 0.32rem;
+        border: 0;
+        border-radius: 999px;
+        background: transparent;
+        color: #3b2118;
+        font-family: inherit;
+        font-size: 1rem;
+        font-weight: 500;
+        text-align: left;
+        cursor: pointer;
+        transition:
+            background 150ms ease,
+            transform 150ms ease;
+    }
+
+    .miembro:hover {
+        background: #f5ebd9;
+    }
+
+    .miembro.activo {
+        background: #f2e5cf;
+    }
+
+    .miembro.activo .miembro-nombre {
+        font-weight: 600;
+    }
+
+    .miembro:focus-visible {
+        outline: 2px solid #6e0d0d;
+        outline-offset: 2px;
+    }
+
+    .miembro-circulo {
+        flex: 0 0 auto;
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: var(--c, #cbe5f4);
+        box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
+    }
+
+    .miembro-nombre {
+        overflow-wrap: anywhere;
+    }
+
+    .col-pendientes {
+        grid-column: 2;
+        grid-row: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .col-pendientes h2 {
+        margin: 0 0 1rem;
+        text-align: center;
+        font-size: 1.05rem;
+        font-weight: 600;
+        letter-spacing: 0.01em;
+        color: #3b2118;
+    }
+
+    .panel {
+        padding: 9px;
+        border-radius: 28px;
+        background: #fffdf7;
+        box-shadow: 0 4px 14px rgba(59, 33, 24, 0.06);
+        min-height: 0;
+        display: flex;
+    }
+
+    .panel-interior {
+        flex: 1;
+        min-height: 0;
+        padding: 1.1rem 1.3rem;
+        border-radius: 21px;
+        background: #fbf9f0;
+        overflow-y: auto;
+        scrollbar-width: thin;
+        scrollbar-color: #dccfbb transparent;
+    }
+
+    .pendientes {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: clamp(0.45rem, 1.5vh, 0.8rem);
+    }
+
+    .pendiente {
+        display: flex;
+        align-items: center;
+        gap: 0.45rem;
+        min-width: 0;
+        font-size: 0.98rem;
+        font-weight: 500;
+        color: #3b2118;
+    }
+
+    .pendiente-titulo {
+        min-width: 0;
+        max-width: 100%;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .puntos {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        flex: 0 0 auto;
+    }
+
+    .punto {
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: var(--c, #6e0d0d);
+        box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+    }
+
+    .pendiente-fecha {
+        margin-left: auto;
+        flex: 0 0 auto;
+        font-size: 0.72rem;
+        font-weight: 500;
+        color: #a08d7c;
+    }
+
+    .sin-pendientes {
+        margin: 0.5rem 0;
+        font-size: 0.9rem;
+        color: #9b8878;
+    }
+
+    .btn-regresar {
+        grid-column: 1;
+        grid-row: 2;
+        justify-self: start;
+        align-self: end;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.45rem 1.8rem 0.45rem 0.9rem;
+        border-radius: 999px;
+        background: #6e0d0d;
+        color: #fff8ee;
+        text-decoration: none;
+        font-size: 1.3rem;
+        font-weight: 700;
+        line-height: 1;
+        box-shadow: 0 4px 10px rgba(92, 16, 17, 0.25);
+        transition:
+            background 160ms ease,
+            transform 160ms ease;
+    }
+
+    .btn-regresar:hover {
+        background: #581010;
+        transform: translateY(-1px);
+    }
+
+    .btn-regresar:focus-visible {
+        outline: 3px solid #b98b4e;
+        outline-offset: 3px;
+    }
+
+    .btn-regresar-icono {
+        width: 24px;
+        height: 24px;
+        flex: 0 0 auto;
+    }
+
+    .adornos {
+        position: absolute;
+        right: clamp(1.5rem, 3.5vw, 3rem);
+        bottom: clamp(1.25rem, 2.5vw, 2rem);
+        display: flex;
+        align-items: flex-end;
+        gap: 0.35rem;
+        pointer-events: none;
+    }
+
+    .asterisco {
+        display: block;
+    }
+
+    .asterisco-azul {
+        width: 42px;
+        height: 42px;
+        color: #cbe5f4;
+        margin-bottom: 0.35rem;
+    }
+
+    .asterisco-vino {
+        width: 38px;
+        height: 38px;
+        color: #6e0d0d;
+    }
+
+    @media (max-width: 860px) {
+        .eq {
+            padding: 10px;
+        }
+
+        .tablero {
+            grid-template-columns: minmax(0, 1fr);
+            grid-template-rows: auto auto auto;
+            row-gap: 1.75rem;
+            padding: 1.5rem 1.1rem 1.75rem;
+            min-height: calc(100vh - 20px);
+            align-content: start;
+        }
+
+        .equipo {
+            grid-column: 1;
+            grid-row: 1;
+            padding-top: 0;
+        }
+
+        .equipo h1 {
+            margin-bottom: 1.15rem;
+            text-align: center;
+        }
+
+        .miembros {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.5rem;
+        }
+
+        .miembro {
+            gap: 0.65rem;
+            padding: 0.3rem;
+            font-size: 0.92rem;
+        }
+
+        .miembro-circulo {
+            width: 34px;
+            height: 34px;
+        }
+
+        .col-pendientes {
+            grid-column: 1;
+            grid-row: 2;
+        }
+
+        .col-pendientes h2 {
+            margin-bottom: 0.75rem;
+        }
+
+        .panel {
+            border-radius: 22px;
+            padding: 7px;
+        }
+
+        .panel-interior {
+            border-radius: 16px;
+            padding: 0.9rem 0.9rem;
+            max-height: 380px;
+        }
+
+        .pendiente {
+            font-size: 0.9rem;
+        }
+
+        .btn-regresar {
+            grid-column: 1;
+            grid-row: 3;
+            font-size: 1.15rem;
+        }
+
+        .adornos {
+            display: none;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .miembro,
+        .btn-regresar {
+            transition: none;
+        }
+    }
+</style>
