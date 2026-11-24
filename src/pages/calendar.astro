@@ -4,78 +4,191 @@ import GuardiaAuth from "../components/GuardiaAuth.astro";
 ---
 
 <BaseLayout title="Iria — Calendario" description="Iria — Calendario de pendientes.">
+    <link slot="head" rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+        slot="head"
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    />
+    <link
+        slot="head"
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"
+    />
+
     <GuardiaAuth />
+
     <main class="cal">
-        <header class="cal-top">
-            <div>
-                <h1>Calendario mensual</h1>
-                <p>Cada tarjeta de color es un pendiente. Toca un día para ver el detalle.</p>
+        <section class="tablero">
+            <div class="zona-cal">
+                <header class="cal-cabecera">
+                    <h1 id="cal-titulo">Mes</h1>
+                    <div class="cal-nav">
+                        <button
+                            type="button"
+                            id="btn-prev"
+                            class="btn-nav"
+                            aria-label="Mes anterior"
+                        >
+                            ‹
+                        </button>
+                        <button
+                            type="button"
+                            id="btn-next"
+                            class="btn-nav"
+                            aria-label="Mes siguiente"
+                        >
+                            ›
+                        </button>
+                        <button type="button" id="btn-hoy" class="btn-hoy">
+                            Hoy
+                        </button>
+                    </div>
+                </header>
+
+                <div class="marco-calendario">
+                    <div class="calendario">
+                        <div class="semana" aria-hidden="true">
+                            <span>Lun</span>
+                            <span>Mar</span>
+                            <span>Mié</span>
+                            <span>Jue</span>
+                            <span>Vie</span>
+                            <span>Sáb</span>
+                            <span>Dom</span>
+                        </div>
+                        <div
+                            id="rejilla"
+                            class="rejilla"
+                            role="grid"
+                            aria-label="Calendario mensual"
+                        >
+                        </div>
+                    </div>
+                </div>
+
+                <section class="detalle" aria-labelledby="detalle-titulo">
+                    <div class="detalle-cab">
+                        <h2 id="detalle-titulo">Pendientes del día</h2>
+                        <p id="dia-fecha" class="dia-fecha"></p>
+                    </div>
+                    <ul id="lista-dia" class="lista" aria-live="polite"></ul>
+                </section>
             </div>
-            <div class="cal-acciones">
-                <button type="button" id="btn-nota" class="btn-primary">
-                    + Crear nota
+
+            <aside class="lateral" aria-labelledby="calendarios-titulo">
+                <h2 id="calendarios-titulo">Calendarios</h2>
+                <p class="ayuda">Toca uno para mostrarlo u ocultarlo.</p>
+                <ul id="lista-calendarios" class="calendarios"></ul>
+
+                <button type="button" id="btn-nota" class="btn-nueva">
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2.5"
+                        stroke-linecap="round"
+                        aria-hidden="true"
+                    >
+                        <path d="M12 5v14M5 12h14"></path>
+                    </svg>
+                    Crear nota
                 </button>
-                <a
-                    href="/ind_1"
-                    id="boton-volver"
-                    class="btn-regresar"
-                    data-astro-prefetch="viewport"
-                    data-cursor-carga
+            </aside>
+
+            <a
+                href="/ind_1"
+                id="boton-volver"
+                class="btn-regresar"
+                data-astro-prefetch="viewport"
+                data-cursor-carga
+            >
+                <svg
+                    class="btn-regresar-icono"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
                 >
-                    Regresar
-                </a>
-            </div>
-        </header>
+                    <path d="M15 5 8 12l7 7"></path>
+                </svg>
+                Regresar
+            </a>
 
-        <section class="ejemplo">
-            <strong>¿Cómo leerlo?</strong>
-            <span class="chip c-parrilla">Parrilla · Ej: Parrilla Café Roma</span>
-            <span class="chip c-subir">Por subir · Ej: Subir reels</span>
-            <span class="chip c-imagen">Imagen · Ej: Crear 4 fotos</span>
-            <span class="chip c-nota">Nota · Ej: Llamar al cliente</span>
-        </section>
-
-        <article class="card cal-grande">
-            <div class="cal-nav">
-                <button type="button" id="btn-prev" aria-label="Mes anterior">‹</button>
-                <h2 id="cal-titulo">Mes</h2>
-                <button type="button" id="btn-next" aria-label="Mes siguiente">›</button>
-                <button type="button" id="btn-hoy" class="btn-hoy">Hoy</button>
+            <div class="adornos" aria-hidden="true">
+                <svg
+                    class="asterisco asterisco-azul"
+                    viewBox="0 0 100 100"
+                    fill="currentColor"
+                >
+                    {Array.from({ length: 8 }).map((_, i) => (
+                        <ellipse
+                            cx="50"
+                            cy="23"
+                            rx="8.5"
+                            ry="23"
+                            transform={`rotate(${i * 45} 50 50)`}
+                        />
+                    ))}
+                </svg>
+                <svg
+                    class="asterisco asterisco-vino"
+                    viewBox="0 0 100 100"
+                    fill="currentColor"
+                >
+                    {Array.from({ length: 8 }).map((_, i) => (
+                        <ellipse
+                            cx="50"
+                            cy="23"
+                            rx="9"
+                            ry="24"
+                            transform={`rotate(${i * 45} 50 50)`}
+                        />
+                    ))}
+                </svg>
             </div>
-            <div class="semana" aria-hidden="true">
-                <span>Lunes</span><span>Martes</span><span>Miércoles</span><span>Jueves</span><span>Viernes</span><span>Sábado</span><span>Domingo</span>
-            </div>
-            <div id="rejilla" class="rejilla"></div>
-        </article>
-
-        <section class="abajo">
-            <article class="card">
-                <h2>Pendientes del día</h2>
-                <p class="muted" id="dia-fecha"></p>
-                <ul id="lista-dia" class="lista"></ul>
-            </article>
-            <article class="card">
-                <h2>Esta semana · ejemplo</h2>
-                <p class="muted">Lo que vería el usuario final</p>
-                <ul class="lista resumen">
-                    <li class="res parrilla"><strong>Lun 6</strong><span>Parrilla Café Roma + subir copies</span></li>
-                    <li class="res subir"><strong>Mar 7</strong><span>Subir 2 reels Hotel Catedral</span></li>
-                    <li class="res imagen"><strong>Mié 8</strong><span>Crear fotos Librería Sur</span></li>
-                    <li class="res nota"><strong>Vie 10</strong><span>Nota: confirmar horario con cliente</span></li>
-                </ul>
-            </article>
         </section>
 
         <div id="modal" class="modal" hidden>
-            <div class="modal-caja" role="dialog" aria-modal="true" aria-labelledby="modal-titulo">
+            <div
+                class="modal-caja"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="modal-titulo"
+            >
                 <h2 id="modal-titulo">Nueva nota</h2>
                 <form id="form-nota">
-                    <label>
-                        Fecha
-                        <input id="f-fecha" type="date" required />
-                    </label>
-                    <label>
-                        Tipo
+                    <div class="renglon">
+                        <label class="campo">
+                            Fecha
+                            <input id="f-fecha" type="date" required />
+                        </label>
+                        <label class="campo">
+                            Calendario
+                            <span class="selector-cal">
+                                <span
+                                    id="f-cal-punto"
+                                    class="punto-cal"
+                                    aria-hidden="true"
+                                ></span>
+                                <select id="f-calendario">
+                                    <option value="importante">
+                                        Importante
+                                    </option>
+                                    <option value="bravar">Bravar</option>
+                                    <option value="dega">Degá</option>
+                                    <option value="calesa">Calesa</option>
+                                    <option value="ibis">Ibis</option>
+                                </select>
+                            </span>
+                        </label>
+                    </div>
+                    <label class="campo">
+                        Tipo de pendiente
                         <select id="f-tipo">
                             <option value="parrilla">Pendiente de parrilla</option>
                             <option value="subir">Por subir</option>
@@ -83,17 +196,35 @@ import GuardiaAuth from "../components/GuardiaAuth.astro";
                             <option value="nota" selected>Nota</option>
                         </select>
                     </label>
-                    <label>
+                    <label class="campo">
                         Título
-                        <input id="f-titulo" type="text" placeholder="Ej. Revisar copy Café Roma" required maxlength="80" />
+                        <input
+                            id="f-titulo"
+                            type="text"
+                            placeholder="Ej. Revisar copy Bravar"
+                            required
+                            maxlength="80"
+                        />
                     </label>
-                    <label>
+                    <label class="campo">
                         Detalle
-                        <textarea id="f-detalle" rows="3" placeholder="Opcional"></textarea>
+                        <textarea
+                            id="f-detalle"
+                            rows="3"
+                            placeholder="Opcional"
+                        ></textarea>
                     </label>
                     <div class="modal-acciones">
-                        <button type="button" id="btn-cancelar" class="btn-ghost">Cancelar</button>
-                        <button type="submit" class="btn-primary">Guardar</button>
+                        <button
+                            type="button"
+                            id="btn-cancelar"
+                            class="btn-secundario"
+                        >
+                            Cancelar
+                        </button>
+                        <button type="submit" class="btn-primario">
+                            Guardar
+                        </button>
                     </div>
                 </form>
             </div>
@@ -102,70 +233,279 @@ import GuardiaAuth from "../components/GuardiaAuth.astro";
 </BaseLayout>
 
 <script>
-    const KEY = "iria_calendar_notas";
-
-    const semillas = [
-        { fecha: "2026-10-05", tipo: "parrilla", titulo: "Parrilla Café Roma" },
-        { fecha: "2026-10-05", tipo: "subir", titulo: "Subir menú semanal" },
-        { fecha: "2026-10-06", tipo: "parrilla", titulo: "Revisar copies Roma" },
-        { fecha: "2026-10-06", tipo: "imagen", titulo: "Crear promo 2x1" },
-        { fecha: "2026-10-07", tipo: "subir", titulo: "Subir 2 reels Catedral" },
-        { fecha: "2026-10-08", tipo: "imagen", titulo: "4 fotos Librería Sur" },
-        { fecha: "2026-10-08", tipo: "nota", titulo: "Llamar a proveedor" },
-        { fecha: "2026-10-10", tipo: "nota", titulo: "Confirmar horario cliente" },
-        { fecha: "2026-10-12", tipo: "parrilla", titulo: "Aprobar Taller Hernández" },
-        { fecha: "2026-10-13", tipo: "subir", titulo: "Subir carrusel Santa Fe" },
-        { fecha: "2026-10-13", tipo: "imagen", titulo: "Portada reporte" },
-        { fecha: "2026-10-13", tipo: "nota", titulo: "Pedir factura" },
-        { fecha: "2026-10-16", tipo: "imagen", titulo: "Sesión La Espiga" },
-        { fecha: "2026-10-20", tipo: "parrilla", titulo: "Parrilla Andalucía" },
-        { fecha: "2026-10-20", tipo: "subir", titulo: "Subir stories Nórdica" },
-        { fecha: "2026-10-23", tipo: "subir", titulo: "Subir video corporativo" },
-        { fecha: "2026-10-27", tipo: "imagen", titulo: "Crear 6 banners" },
-        { fecha: "2026-10-29", tipo: "parrilla", titulo: "Cierre de mes" },
+    const CALENDARIOS = [
+        { id: "importante", nombre: "Importante", color: "#6e0d0d" },
+        { id: "bravar", nombre: "Bravar", color: "#a9cfe4" },
+        { id: "dega", nombre: "Degá", color: "#5f4a3f" },
+        { id: "calesa", nombre: "Calesa", color: "#96605a" },
+        { id: "ibis", nombre: "Ibis", color: "#e9d583" },
     ];
+    const POR_ID = Object.fromEntries(
+        CALENDARIOS.map((c) => [c.id, c]),
+    ) as Record<string, { id: string; nombre: string; color: string }>;
 
-    const MESES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
-    const TIPOS = { parrilla: "Parrilla", subir: "Por subir", imagen: "Imagen", nota: "Nota" };
+    const MESES = [
+        "Enero",
+        "Febrero",
+        "Marzo",
+        "Abril",
+        "Mayo",
+        "Junio",
+        "Julio",
+        "Agosto",
+        "Septiembre",
+        "Octubre",
+        "Noviembre",
+        "Diciembre",
+    ];
+    const TIPOS: Record<string, string> = {
+        parrilla: "Parrilla",
+        subir: "Por subir",
+        imagen: "Imagen",
+        nota: "Nota",
+    };
+
+    const KEY = "iria_calendar_notas";
+    const KEY_OCULTOS = "iria_calendar_calendarios_ocultos";
 
     const hoy = new Date();
-    const estado = { y: hoy.getFullYear(), m: hoy.getMonth(), sel: aFecha(hoy) };
+    const pad = (n: number) => String(n).padStart(2, "0");
+    const aFecha = (d: Date) =>
+        `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+
+    const baseY = hoy.getFullYear();
+    const baseM = hoy.getMonth();
+    const enMes = (dia: number) =>
+        `${baseY}-${pad(baseM + 1)}-${pad(dia)}`;
+
+    const semillas = [
+        {
+            fecha: enMes(3),
+            calendario: "importante",
+            tipo: "nota",
+            titulo: "Entrega de reporte mensual",
+        },
+        {
+            fecha: enMes(3),
+            calendario: "ibis",
+            tipo: "parrilla",
+            titulo: "Parrilla Ibis Chihuahua",
+        },
+        {
+            fecha: enMes(5),
+            calendario: "bravar",
+            tipo: "subir",
+            titulo: "Subir 2 reels Bravar",
+        },
+        {
+            fecha: enMes(6),
+            calendario: "calesa",
+            tipo: "imagen",
+            titulo: "Sesión de fotos Calesa",
+        },
+        {
+            fecha: enMes(8),
+            calendario: "dega",
+            tipo: "nota",
+            titulo: "Llamar a Degá",
+        },
+        {
+            fecha: enMes(10),
+            calendario: "importante",
+            tipo: "nota",
+            titulo: "Confirmar junta con clientes",
+        },
+        {
+            fecha: enMes(10),
+            calendario: "ibis",
+            tipo: "imagen",
+            titulo: "Crear 4 banners Ibis",
+        },
+        {
+            fecha: enMes(12),
+            calendario: "bravar",
+            tipo: "parrilla",
+            titulo: "Aprobar parrilla Bravar",
+        },
+        {
+            fecha: enMes(14),
+            calendario: "calesa",
+            tipo: "nota",
+            titulo: "Enviar factura Calesa",
+        },
+        {
+            fecha: enMes(17),
+            calendario: "dega",
+            tipo: "subir",
+            titulo: "Subir menú Degá",
+        },
+        {
+            fecha: enMes(20),
+            calendario: "importante",
+            tipo: "nota",
+            titulo: "Revisión de cuentas",
+        },
+        {
+            fecha: enMes(22),
+            calendario: "ibis",
+            tipo: "parrilla",
+            titulo: "Parrilla semanal Ibis",
+        },
+        {
+            fecha: enMes(24),
+            calendario: "bravar",
+            tipo: "imagen",
+            titulo: "Portada Bravar",
+        },
+        {
+            fecha: enMes(26),
+            calendario: "calesa",
+            tipo: "subir",
+            titulo: "Subir carrusel Calesa",
+        },
+    ];
+
+    type Evento = {
+        id?: string;
+        fecha: string;
+        calendario: string;
+        tipo: string;
+        titulo: string;
+        detalle?: string;
+    };
+
+    const estado = {
+        y: hoy.getFullYear(),
+        m: hoy.getMonth(),
+        sel: aFecha(hoy),
+    };
 
     const rejilla = document.getElementById("rejilla");
     const titulo = document.getElementById("cal-titulo");
     const listaDia = document.getElementById("lista-dia");
     const diaFecha = document.getElementById("dia-fecha");
+    const listaCalendarios = document.getElementById("lista-calendarios");
     const modal = document.getElementById("modal");
     const form = document.getElementById("form-nota") as HTMLFormElement | null;
     const fFecha = document.getElementById("f-fecha") as HTMLInputElement | null;
+    const fCalendario = document.getElementById(
+        "f-calendario",
+    ) as HTMLSelectElement | null;
+    const fCalPunto = document.getElementById("f-cal-punto");
 
-    function aFecha(d) { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; }
-    function leerNotas() {
-        try { return JSON.parse(localStorage.getItem(KEY) ?? "[]"); }
-        catch { return []; }
+    function leerNotas(): Evento[] {
+        try {
+            const crudo = JSON.parse(localStorage.getItem(KEY) ?? "[]");
+            if (!Array.isArray(crudo)) return [];
+            return crudo
+                .filter((n) => n && n.fecha && n.titulo)
+                .map((n) => ({
+                    ...n,
+                    calendario: POR_ID[n.calendario] ? n.calendario : "importante",
+                }));
+        } catch {
+            return [];
+        }
     }
-    function guardarNotas(n) { localStorage.setItem(KEY, JSON.stringify(n)); }
-    function todos() { return [...semillas, ...leerNotas()]; }
-    function eventosDel(fecha) { return todos().filter((e) => e.fecha === fecha); }
+
+    function guardarNotas(notas: Evento[]) {
+        try {
+            localStorage.setItem(KEY, JSON.stringify(notas));
+        } catch {
+            /* sin almacenamiento disponible */
+        }
+    }
+
+    function leerOcultos(): Set<string> {
+        try {
+            const crudo = JSON.parse(localStorage.getItem(KEY_OCULTOS) ?? "[]");
+            return new Set(Array.isArray(crudo) ? crudo : []);
+        } catch {
+            return new Set();
+        }
+    }
+
+    function guardarOcultos() {
+        try {
+            localStorage.setItem(KEY_OCULTOS, JSON.stringify([...ocultos]));
+        } catch {
+            /* sin almacenamiento disponible */
+        }
+    }
+
+    const ocultos = leerOcultos();
+    const todosSinFiltro = (): Evento[] => [...semillas, ...leerNotas()];
+    const todos = (): Evento[] =>
+        todosSinFiltro().filter((e) => !ocultos.has(e.calendario));
+    const eventosDel = (fecha: string) =>
+        todos().filter((e) => e.fecha === fecha);
+    const contarCalendario = (id: string) =>
+        todosSinFiltro().filter((e) => e.calendario === id).length;
+
+    function pintarCalendarios() {
+        if (!listaCalendarios) return;
+        listaCalendarios.innerHTML = "";
+        CALENDARIOS.forEach((c) => {
+            const li = document.createElement("li");
+            li.className = "calendario-item";
+
+            const label = document.createElement("label");
+            const input = document.createElement("input");
+            input.type = "checkbox";
+            input.checked = !ocultos.has(c.id);
+            input.setAttribute("aria-label", `Mostrar el calendario ${c.nombre}`);
+
+            const marca = document.createElement("span");
+            marca.className = "marca";
+            marca.style.setProperty("--c", c.color);
+            marca.setAttribute("aria-hidden", "true");
+
+            const nombre = document.createElement("span");
+            nombre.className = "nombre";
+            nombre.textContent = c.nombre;
+
+            const cuenta = document.createElement("span");
+            cuenta.className = "cuenta";
+            cuenta.textContent = String(contarCalendario(c.id));
+
+            label.append(input, marca, nombre, cuenta);
+            input.addEventListener("change", () => {
+                if (input.checked) ocultos.delete(c.id);
+                else ocultos.add(c.id);
+                guardarOcultos();
+                pintar();
+                pintarDia();
+            });
+
+            li.append(label);
+            listaCalendarios.append(li);
+        });
+    }
 
     function pintar() {
         if (!rejilla || !titulo) return;
         titulo.textContent = `${MESES[estado.m]} ${estado.y}`;
         rejilla.innerHTML = "";
+
         const primero = new Date(estado.y, estado.m, 1);
-        let desfase = (primero.getDay() + 6) % 7;
+        const desfase = (primero.getDay() + 6) % 7;
         const dias = new Date(estado.y, estado.m + 1, 0).getDate();
+
         for (let i = 0; i < desfase; i++) {
             const v = document.createElement("span");
             v.className = "vacio";
             rejilla.appendChild(v);
         }
+
         for (let d = 1; d <= dias; d++) {
-            const fecha = `${estado.y}-${String(estado.m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+            const fecha = `${estado.y}-${pad(estado.m + 1)}-${pad(d)}`;
             const evs = eventosDel(fecha);
+
             const b = document.createElement("button");
             b.type = "button";
             b.className = "dia";
+            b.setAttribute("role", "gridcell");
+
             if (fecha === estado.sel) b.classList.add("sel");
             if (fecha === aFecha(hoy)) b.classList.add("hoy");
 
@@ -174,29 +514,52 @@ import GuardiaAuth from "../components/GuardiaAuth.astro";
             num.textContent = String(d);
             b.appendChild(num);
 
-            const cont = document.createElement("span");
-            cont.className = "chips";
+            const puntos = document.createElement("span");
+            puntos.className = "puntos";
             evs.slice(0, 3).forEach((e) => {
-                const c = document.createElement("span");
-                c.className = `mini m-${e.tipo}`;
-                c.textContent = e.titulo;
-                cont.appendChild(c);
+                const cal = POR_ID[e.calendario] ?? POR_ID.importante;
+                const p = document.createElement("span");
+                p.className = "punto";
+                p.style.setProperty("--c", cal.color);
+                puntos.appendChild(p);
             });
             if (evs.length > 3) {
                 const mas = document.createElement("span");
                 mas.className = "mas";
-                mas.textContent = `+${evs.length - 3} más`;
-                cont.appendChild(mas);
+                mas.textContent = `+${evs.length - 3}`;
+                puntos.appendChild(mas);
             }
-            if (!evs.length) {
-                const libre = document.createElement("span");
-                libre.className = "libre";
-                libre.textContent = "Libre";
-                cont.appendChild(libre);
-            }
-            b.appendChild(cont);
-            b.addEventListener("click", () => { estado.sel = fecha; pintar(); pintarDia(); });
+            b.appendChild(puntos);
+
+            const resumen = evs.length
+                ? evs
+                      .map(
+                          (e) =>
+                              `${e.titulo} · ${(POR_ID[e.calendario] ?? POR_ID.importante).nombre}`,
+                      )
+                      .join("\n")
+                : "Día libre";
+            b.title = resumen;
+            b.setAttribute(
+                "aria-label",
+                `${d} de ${MESES[estado.m]}: ${evs.length} pendiente(s)`,
+            );
+
+            b.addEventListener("click", () => {
+                estado.sel = fecha;
+                pintar();
+                pintarDia();
+            });
+
             rejilla.appendChild(b);
+        }
+
+        const totalCeldas = desfase + dias;
+        const sobrantes = (7 - (totalCeldas % 7)) % 7;
+        for (let i = 0; i < sobrantes; i++) {
+            const v = document.createElement("span");
+            v.className = "vacio";
+            rejilla.appendChild(v);
         }
     }
 
@@ -204,230 +567,1028 @@ import GuardiaAuth from "../components/GuardiaAuth.astro";
         if (!listaDia) return;
         const evs = eventosDel(estado.sel);
         const [y, m, d] = estado.sel.split("-").map(Number);
-        if (diaFecha) diaFecha.textContent = `${d} de ${MESES[m-1]} de ${y} · ${evs.length} pendiente(s)`;
+        if (diaFecha) {
+            diaFecha.textContent = `${d} de ${MESES[m - 1]} de ${y} · ${evs.length} pendiente(s)`;
+        }
+
         listaDia.innerHTML = "";
         if (!evs.length) {
+            const hayOcultos = todosSinFiltro().some(
+                (e) =>
+                    e.fecha === estado.sel && ocultos.has(e.calendario),
+            );
             const li = document.createElement("li");
             li.className = "vacio-msg";
-            li.textContent = "Día libre. Usa «+ Crear nota» para agregar un pendiente aquí.";
+            li.textContent = hayOcultos
+                ? "Todo lo de este día está en calendarios ocultos. Actívalos para verlo."
+                : "Día libre. Usa «Crear nota» para agregar un pendiente aquí.";
             listaDia.appendChild(li);
             return;
         }
+
         const notas = leerNotas();
         evs.forEach((e) => {
+            const cal = POR_ID[e.calendario] ?? POR_ID.importante;
             const li = document.createElement("li");
-            li.className = `item b-${e.tipo}`;
-            const esNota = "id" in e;
-            li.innerHTML = `<span class="pill p-${e.tipo}">${TIPOS[e.tipo] ?? e.tipo}</span><strong></strong>${e.detalle ? "<span class='det'></span>" : ""}`;
-            li.querySelector("strong")!.textContent = e.titulo;
-            if (e.detalle) li.querySelector(".det")!.textContent = e.detalle;
-            if (esNota) {
+            li.className = "item";
+            li.style.setProperty("--c", cal.color);
+
+            const marca = document.createElement("span");
+            marca.className = "item-marca";
+            marca.setAttribute("aria-hidden", "true");
+
+            const texto = document.createElement("div");
+            texto.className = "item-texto";
+
+            const tituloItem = document.createElement("strong");
+            tituloItem.textContent = e.titulo || "Sin título";
+
+            const meta = document.createElement("span");
+            meta.className = "item-meta";
+            meta.textContent = `${cal.nombre} · ${TIPOS[e.tipo] ?? e.tipo}`;
+
+            texto.append(tituloItem, meta);
+
+            if (e.detalle) {
+                const det = document.createElement("span");
+                det.className = "item-det";
+                det.textContent = e.detalle;
+                texto.appendChild(det);
+            }
+
+            li.append(marca, texto);
+
+            if (e.id) {
                 const del = document.createElement("button");
                 del.type = "button";
                 del.className = "btn-del";
-                del.textContent = "Eliminar";
+                del.setAttribute("aria-label", `Eliminar ${e.titulo}`);
+                del.innerHTML =
+                    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg>';
                 del.addEventListener("click", () => {
                     guardarNotas(notas.filter((n) => n.id !== e.id));
-                    pintar(); pintarDia();
+                    pintar();
+                    pintarDia();
+                    pintarCalendarios();
                 });
                 li.appendChild(del);
             }
+
             listaDia.appendChild(li);
         });
+    }
+
+    function actualizarPuntoCalendario() {
+        if (!fCalendario || !fCalPunto) return;
+        const cal = POR_ID[fCalendario.value] ?? POR_ID.importante;
+        fCalPunto.style.setProperty("--c", cal.color);
     }
 
     function abrirModal() {
         modal?.removeAttribute("hidden");
         if (fFecha) fFecha.value = estado.sel;
+        actualizarPuntoCalendario();
         (document.getElementById("f-titulo") as HTMLInputElement | null)?.focus();
     }
-    function cerrarModal() { modal?.setAttribute("hidden", ""); }
+
+    function cerrarModal() {
+        modal?.setAttribute("hidden", "");
+    }
 
     document.getElementById("btn-prev")?.addEventListener("click", () => {
-        estado.m--; if (estado.m < 0) { estado.m = 11; estado.y--; } pintar();
+        estado.m--;
+        if (estado.m < 0) {
+            estado.m = 11;
+            estado.y--;
+        }
+        pintar();
     });
+
     document.getElementById("btn-next")?.addEventListener("click", () => {
-        estado.m++; if (estado.m > 11) { estado.m = 0; estado.y++; } pintar();
+        estado.m++;
+        if (estado.m > 11) {
+            estado.m = 0;
+            estado.y++;
+        }
+        pintar();
     });
+
     document.getElementById("btn-hoy")?.addEventListener("click", () => {
-        estado.y = hoy.getFullYear(); estado.m = hoy.getMonth(); estado.sel = aFecha(hoy); pintar(); pintarDia();
+        estado.y = hoy.getFullYear();
+        estado.m = hoy.getMonth();
+        estado.sel = aFecha(hoy);
+        pintar();
+        pintarDia();
     });
+
     document.getElementById("btn-nota")?.addEventListener("click", abrirModal);
     document.getElementById("btn-cancelar")?.addEventListener("click", cerrarModal);
-    modal?.addEventListener("click", (e) => { if (e.target === modal) cerrarModal(); });
+
+    modal?.addEventListener("click", (e) => {
+        if (e.target === modal) cerrarModal();
+    });
+
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") cerrarModal();
+    });
+
+    fCalendario?.addEventListener("change", actualizarPuntoCalendario);
 
     form?.addEventListener("submit", (e) => {
         e.preventDefault();
-        const fecha = (document.getElementById("f-fecha") as HTMLInputElement).value;
-        const tipo = (document.getElementById("f-tipo") as HTMLSelectElement).value;
-        const tituloN = (document.getElementById("f-titulo") as HTMLInputElement).value.trim();
-        const detalle = (document.getElementById("f-detalle") as HTMLTextAreaElement).value.trim();
+        const fecha = (document.getElementById("f-fecha") as HTMLInputElement)
+            .value;
+        const calendario = (
+            document.getElementById("f-calendario") as HTMLSelectElement
+        ).value;
+        const tipo = (document.getElementById("f-tipo") as HTMLSelectElement)
+            .value;
+        const tituloN = (
+            document.getElementById("f-titulo") as HTMLInputElement
+        ).value.trim();
+        const detalle = (
+            document.getElementById("f-detalle") as HTMLTextAreaElement
+        ).value.trim();
         if (!fecha || !tituloN) return;
+
         const notas = leerNotas();
-        notas.push({ id: `n${Date.now()}`, fecha, tipo, titulo: tituloN, detalle });
+        notas.push({
+            id: `n${Date.now()}`,
+            fecha,
+            calendario,
+            tipo,
+            titulo: tituloN,
+            detalle,
+        });
         guardarNotas(notas);
+
+        if (ocultos.has(calendario)) {
+            ocultos.delete(calendario);
+            guardarOcultos();
+        }
+
         const [y, m] = fecha.split("-").map(Number);
-        estado.y = y; estado.m = m - 1; estado.sel = fecha;
+        estado.y = y;
+        estado.m = m - 1;
+        estado.sel = fecha;
+
         form.reset();
-        cerrarModal(); pintar(); pintarDia();
+        if (fCalendario) fCalendario.value = calendario;
+        cerrarModal();
+        pintar();
+        pintarDia();
+        pintarCalendarios();
     });
 
-    pintar(); pintarDia();
+    pintarCalendarios();
+    pintar();
+    pintarDia();
 </script>
 
 <style is:global>
     .cal {
         min-height: 100vh;
-        background: #f1f5f9;
-        padding: 1.5rem;
         box-sizing: border-box;
+        padding: 18px;
+        background: #5c1011;
         display: flex;
-        flex-direction: column;
-        gap: 1.2rem;
         width: 100%;
         margin: 0;
+        font-family: "Poppins", system-ui, sans-serif;
+        color: #3b2118;
     }
-    .cal button {
+
+    .cal button,
+    .cal input,
+    .cal select,
+    .cal textarea {
         font-family: inherit;
     }
-    .cal-top {
-        background: #fff;
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        padding: 1.5rem;
+
+    .tablero {
+        position: relative;
+        flex: 1;
+        display: grid;
+        grid-template-columns: minmax(0, 1.35fr) minmax(250px, 0.78fr);
+        grid-template-rows: 1fr auto;
+        column-gap: clamp(1.75rem, 4.5vw, 4.5rem);
+        row-gap: clamp(1.25rem, 2.6vw, 2rem);
+        box-sizing: border-box;
+        width: 100%;
+        min-height: calc(100vh - 36px);
+        padding: clamp(1.5rem, 3.2vw, 2.75rem) clamp(1.5rem, 3.2vw, 3rem)
+            clamp(1.5rem, 2.6vw, 2.25rem);
+        border-radius: 30px;
+        background: #fbf9f0;
+        box-shadow: 0 22px 45px rgba(30, 3, 3, 0.35);
+        overflow: hidden;
+    }
+
+    .zona-cal {
+        grid-column: 1;
+        grid-row: 1;
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+    }
+
+    .cal-cabecera {
         display: flex;
         align-items: center;
         justify-content: space-between;
         gap: 1rem;
+        margin-bottom: 1.1rem;
     }
-    .cal-top h1 { margin: 0; font-size: 2rem; font-weight: 800; color: #0f172a; }
-    .cal-top p { margin: 0.25rem 0 0; color: #64748b; font-size: 1rem; }
-    .cal-acciones { display: flex; gap: 0.6rem; }
-    .btn-primary {
-        border: none; border-radius: 6px; background: #0f172a; color: #fff;
-        padding: 0.75rem 1.5rem; font-size: 1rem; font-weight: 700; cursor: pointer; white-space: nowrap;
+
+    .cal-cabecera h1 {
+        margin: 0;
+        font-size: clamp(1.05rem, 1.7vw, 1.35rem);
+        font-weight: 800;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+        color: #3b2118;
     }
-    .btn-primary:hover { background: #1e293b; }
-    .btn-regresar {
-        display: inline-flex; align-items: center; justify-content: center;
-        box-sizing: border-box; text-decoration: none; font-family: inherit;
-        border: 1px solid #cbd5e1; border-radius: 6px; background: #fff; color: #0f172a;
-        padding: 0.75rem 1.5rem; font-size: 1rem; font-weight: 600; cursor: pointer; white-space: nowrap;
+
+    .cal-nav {
+        display: flex;
+        align-items: center;
+        gap: 0.45rem;
     }
-    .ejemplo {
-        background: #fff; border: 1px solid #e2e8f0; border-radius: 8px;
-        padding: 1rem 1.2rem; display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem;
-        color: #0f172a;
+
+    .btn-nav,
+    .btn-hoy {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        height: 34px;
+        border: 1px solid rgba(110, 13, 13, 0.2);
+        background: #fffdf7;
+        color: #6e0d0d;
+        border-radius: 999px;
+        cursor: pointer;
+        transition:
+            background 150ms ease,
+            border-color 150ms ease;
     }
-    .chip {
-        font-size: 0.9rem; font-weight: 600; padding: 0.45rem 0.8rem; border-radius: 999px;
-        border: 1px solid transparent; white-space: nowrap;
+
+    .btn-nav {
+        width: 34px;
+        font-size: 1.25rem;
+        line-height: 1;
+        padding: 0 0 0.15rem;
     }
-    .c-parrilla { background: #e2e8f0; color: #0f172a; }
-    .c-subir { background: #dbeafe; color: #1d4ed8; }
-    .c-imagen { background: #f3e8ff; color: #7e22ce; }
-    .c-nota { background: #dcfce7; color: #166534; }
-    .cal-grande { padding: 1.8rem; }
-    .card {
-        background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.5rem;
+
+    .btn-hoy {
+        padding: 0 1rem;
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
     }
-    .card h2 { margin: 0; font-size: 1.4rem; color: #0f172a; }
-    .muted { margin: 0.25rem 0 1rem; color: #64748b; font-size: 0.95rem; }
-    .cal-nav { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1.2rem; }
-    .cal-nav h2 { flex: 1; font-size: 1.8rem; }
-    .cal-nav button {
-        border: 1px solid #cbd5e1; background: #fff; border-radius: 8px;
-        width: 48px; height: 48px; font-size: 1.6rem; cursor: pointer; color: #0f172a;
+
+    .btn-nav:hover,
+    .btn-hoy:hover {
+        background: #f7efe0;
+        border-color: rgba(110, 13, 13, 0.4);
     }
-    .btn-hoy { width: auto !important; padding: 0 1.4rem; font-size: 1rem !important; font-weight: 700; }
-    .semana, .rejilla { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.6rem; }
-    .semana { margin-bottom: 0.6rem; }
-    .semana span {
-        text-align: center; font-size: 0.95rem; font-weight: 800; color: #0f172a;
-        background: #f1f5f9; border-radius: 6px; padding: 0.6rem 0;
+
+    .btn-nav:focus-visible,
+    .btn-hoy:focus-visible {
+        outline: 2px solid #6e0d0d;
+        outline-offset: 2px;
     }
-    .rejilla { min-height: 0; }
+
+    .marco-calendario {
+        padding: 7px;
+        border-radius: 26px;
+        background: linear-gradient(
+            150deg,
+            #f8edb6 0%,
+            #f1dcc2 18%,
+            #cfa9a2 30%,
+            #893734 42%,
+            #6e0d0d 53%,
+            #7c919d 69%,
+            #c9e0ec 85%,
+            #e8f3f8 100%
+        );
+        box-shadow: 0 12px 26px rgba(92, 16, 17, 0.16);
+    }
+
+    .calendario {
+        border-radius: 20px;
+        background: #fffdf7;
+        padding: 0.85rem 0.9rem 1rem;
+        box-shadow: inset 0 0 0 1px rgba(110, 13, 13, 0.08);
+    }
+
+    .semana {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 1px;
+        padding: 0 1px 0.45rem;
+        text-align: center;
+        font-size: 0.68rem;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #a08d7c;
+    }
+
+    .rejilla {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 1px;
+        padding: 1px;
+        border-radius: 10px;
+        background: #e7dcc8;
+        overflow: hidden;
+    }
+
+    .vacio {
+        background: #fffdf7;
+        min-height: clamp(48px, 6.4vh, 70px);
+    }
+
     .dia {
-        min-height: clamp(96px, 11vw, 138px); border: 2px solid #e2e8f0; border-radius: 10px; background: #fff;
-        cursor: pointer; padding: 0.6rem; display: flex; flex-direction: column; gap: 0.4rem;
-        align-items: stretch; text-align: left;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.3rem;
+        min-height: clamp(48px, 6.4vh, 70px);
+        padding: 0.4rem 0.45rem;
+        border: 0;
+        background: #fffdf7;
+        cursor: pointer;
+        text-align: left;
+        transition: background 140ms ease;
     }
-    .dia:hover { border-color: #0f172a; background: #f8fafc; }
-    .dia.sel { border-color: #0f172a; background: #f8fafc; box-shadow: 0 0 0 2px #0f172a inset; }
-    .dia.hoy .num { background: #0f172a; color: #fff; }
-    .dia.sel.hoy .num { background: #fff; color: #0f172a; }
+
+    .dia:hover {
+        background: #faf2e3;
+    }
+
+    .dia.sel {
+        background: #f8eeda;
+        box-shadow: inset 0 0 0 2px rgba(110, 13, 13, 0.45);
+    }
+
+    .dia:focus-visible {
+        outline: 2px solid #6e0d0d;
+        outline-offset: -3px;
+    }
+
     .num {
-        align-self: flex-start; font-weight: 800; font-size: 1.1rem; color: #0f172a;
-        min-width: 32px; height: 32px; display: grid; place-items: center; border-radius: 50%;
+        display: grid;
+        place-items: center;
+        min-width: 22px;
+        height: 22px;
+        padding: 0 0.2rem;
+        border-radius: 999px;
+        font-size: 0.76rem;
+        font-weight: 600;
+        color: #5c4638;
+        box-sizing: border-box;
     }
-    .vacio { min-height: clamp(96px, 11vw, 138px); }
-    .chips { display: flex; flex-direction: column; gap: 0.3rem; }
-    .mini {
-        font-size: 0.78rem; font-weight: 700; padding: 0.3rem 0.5rem; border-radius: 6px;
-        white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: left;
+
+    .dia.hoy .num {
+        background: #6e0d0d;
+        color: #fff8ee;
     }
-    .m-parrilla { background: #e2e8f0; color: #0f172a; }
-    .m-subir { background: #dbeafe; color: #1d4ed8; }
-    .m-imagen { background: #f3e8ff; color: #7e22ce; }
-    .m-nota { background: #dcfce7; color: #166534; }
-    .mas { font-size: 0.75rem; font-weight: 700; color: #64748b; }
-    .libre { font-size: 0.8rem; color: #cbd5e1; font-weight: 600; }
-    .abajo { display: grid; grid-template-columns: 1.4fr 1fr; gap: 1rem; align-items: start; }
-    .lista { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.8rem; }
+
+    .dia.hoy.sel .num {
+        background: #6e0d0d;
+        color: #fff8ee;
+    }
+
+    .puntos {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 3px;
+        margin-top: auto;
+    }
+
+    .punto {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--c, #6e0d0d);
+        box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12);
+    }
+
+    .mas {
+        font-size: 0.62rem;
+        font-weight: 700;
+        color: #8f7b68;
+        letter-spacing: 0.02em;
+    }
+
+    .detalle {
+        margin-top: 1.15rem;
+        min-height: 0;
+    }
+
+    .detalle-cab {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 0.55rem;
+    }
+
+    .detalle-cab h2 {
+        margin: 0;
+        font-size: 0.74rem;
+        font-weight: 700;
+        letter-spacing: 0.09em;
+        text-transform: uppercase;
+        color: #6e0d0d;
+    }
+
+    .dia-fecha {
+        margin: 0;
+        font-size: 0.74rem;
+        color: #9b8878;
+        text-align: right;
+    }
+
+    .lista {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.45rem;
+        max-height: min(170px, 20vh);
+        overflow-y: auto;
+        scrollbar-width: thin;
+        scrollbar-color: #dccfbb transparent;
+    }
+
     .item {
-        border: 1px solid #e2e8f0; border-left-width: 6px; border-radius: 6px;
-        padding: 0.9rem; display: flex; flex-direction: column; gap: 0.35rem; align-items: flex-start;
-        background: #fff;
+        display: flex;
+        align-items: flex-start;
+        gap: 0.65rem;
+        padding: 0.55rem 0.7rem;
+        border-radius: 12px;
+        background: #fffdf7;
+        border: 1px solid #eee1cd;
+        border-left: 5px solid var(--c, #6e0d0d);
     }
-    .item.b-parrilla { border-left-color: #0f172a; }
-    .item.b-subir { border-left-color: #2563eb; }
-    .item.b-imagen { border-left-color: #9333ea; }
-    .item.b-nota { border-left-color: #16a34a; }
-    .item strong { color: #0f172a; font-size: 1rem; }
-    .item .det { color: #64748b; font-size: 0.9rem; }
-    .pill { font-size: 0.75rem; font-weight: 800; padding: 0.2rem 0.7rem; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.04em; }
-    .pill.p-parrilla { background: #e2e8f0; color: #0f172a; }
-    .pill.p-subir { background: #dbeafe; color: #1d4ed8; }
-    .pill.p-imagen { background: #f3e8ff; color: #7e22ce; }
-    .pill.p-nota { background: #dcfce7; color: #166534; }
-    .btn-del { border: none; background: none; color: #dc2626; font-size: 0.85rem; font-weight: 700; cursor: pointer; padding: 0; }
-    .vacio-msg { color: #64748b; }
-    .resumen .res {
-        display: flex; align-items: center; gap: 0.8rem;
-        border: 1px solid #e2e8f0; border-left-width: 6px; border-radius: 6px; padding: 0.8rem 1rem;
+
+    .item-marca {
+        flex: 0 0 auto;
+        width: 9px;
+        height: 9px;
+        margin-top: 0.42rem;
+        border-radius: 50%;
+        background: var(--c, #6e0d0d);
+        box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12);
     }
-    .res.parrilla { border-left-color: #0f172a; }
-    .res.subir { border-left-color: #2563eb; }
-    .res.imagen { border-left-color: #9333ea; }
-    .res.nota { border-left-color: #16a34a; }
-    .res strong { color: #0f172a; white-space: nowrap; }
-    .res span { color: #475569; font-size: 0.95rem; }
+
+    .item-texto {
+        display: flex;
+        flex-direction: column;
+        gap: 0.1rem;
+        min-width: 0;
+        flex: 1;
+    }
+
+    .item-texto strong {
+        font-size: 0.88rem;
+        font-weight: 600;
+        color: #3b2118;
+        overflow-wrap: anywhere;
+    }
+
+    .item-meta {
+        font-size: 0.7rem;
+        font-weight: 500;
+        color: #9b8878;
+    }
+
+    .item-det {
+        font-size: 0.76rem;
+        color: #6d594a;
+        overflow-wrap: anywhere;
+    }
+
+    .btn-del {
+        flex: 0 0 auto;
+        display: grid;
+        place-items: center;
+        width: 24px;
+        height: 24px;
+        padding: 0;
+        border: 0;
+        border-radius: 50%;
+        background: transparent;
+        color: #b0998a;
+        cursor: pointer;
+    }
+
+    .btn-del svg {
+        width: 13px;
+        height: 13px;
+    }
+
+    .btn-del:hover {
+        background: #f5e5e2;
+        color: #8f2b2b;
+    }
+
+    .btn-del:focus-visible {
+        outline: 2px solid #6e0d0d;
+        outline-offset: 1px;
+    }
+
+    .vacio-msg {
+        padding: 0.7rem 0.2rem;
+        font-size: 0.82rem;
+        color: #9b8878;
+    }
+
+    .lateral {
+        grid-column: 2;
+        grid-row: 1;
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        padding-top: 0.1rem;
+    }
+
+    .lateral h2 {
+        margin: 0;
+        text-align: center;
+        font-size: clamp(1.45rem, 2.3vw, 1.9rem);
+        font-weight: 800;
+        letter-spacing: -0.01em;
+        color: #3b2118;
+    }
+
+    .ayuda {
+        margin: 0.3rem 0 1.75rem;
+        text-align: center;
+        font-size: 0.72rem;
+        color: #a08d7c;
+    }
+
+    .calendarios {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .calendario-item label {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 0.9rem;
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .calendario-item input {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .marca {
+        flex: 0 0 auto;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: var(--c, #6e0d0d);
+        box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.14);
+        transition:
+            background 150ms ease,
+            box-shadow 150ms ease,
+            transform 150ms ease;
+    }
+
+    .calendario-item input:not(:checked) + .marca {
+        background: transparent;
+        box-shadow:
+            inset 0 0 0 2.5px var(--c, #6e0d0d),
+            inset 0 0 0 4px #fbf9f0;
+    }
+
+    .calendario-item input:focus-visible + .marca {
+        outline: 2px solid #6e0d0d;
+        outline-offset: 3px;
+    }
+
+    .nombre {
+        font-size: 1.02rem;
+        font-weight: 600;
+        color: #3b2118;
+        transition: color 150ms ease;
+        overflow-wrap: anywhere;
+    }
+
+    .calendario-item input:not(:checked) ~ .nombre {
+        color: #b0a092;
+    }
+
+    .cuenta {
+        margin-left: auto;
+        font-size: 0.72rem;
+        font-weight: 500;
+        color: #a08d7c;
+    }
+
+    .calendario-item label:hover .marca {
+        transform: scale(1.06);
+    }
+
+    .btn-nueva {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.45rem;
+        align-self: stretch;
+        margin-top: clamp(1.75rem, 4vh, 2.75rem);
+        padding: 0.7rem 1.4rem;
+        border: 0;
+        border-radius: 999px;
+        background: #6e0d0d;
+        color: #fff8ee;
+        font-size: 0.95rem;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: 0 6px 14px rgba(92, 16, 17, 0.24);
+        transition:
+            background 150ms ease,
+            transform 150ms ease;
+    }
+
+    .btn-nueva svg {
+        width: 17px;
+        height: 17px;
+    }
+
+    .btn-nueva:hover {
+        background: #581010;
+        transform: translateY(-1px);
+    }
+
+    .btn-nueva:focus-visible {
+        outline: 3px solid #b98b4e;
+        outline-offset: 3px;
+    }
+
+    .btn-regresar {
+        grid-column: 1;
+        grid-row: 2;
+        justify-self: start;
+        align-self: end;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.45rem 1.8rem 0.45rem 0.9rem;
+        border-radius: 999px;
+        background: #6e0d0d;
+        color: #fff8ee;
+        text-decoration: none;
+        font-size: 1.3rem;
+        font-weight: 700;
+        line-height: 1;
+        box-shadow: 0 4px 10px rgba(92, 16, 17, 0.25);
+        transition:
+            background 160ms ease,
+            transform 160ms ease;
+    }
+
+    .btn-regresar:hover {
+        background: #581010;
+        transform: translateY(-1px);
+    }
+
+    .btn-regresar:focus-visible {
+        outline: 3px solid #b98b4e;
+        outline-offset: 3px;
+    }
+
+    .btn-regresar-icono {
+        width: 24px;
+        height: 24px;
+        flex: 0 0 auto;
+    }
+
+    .adornos {
+        position: absolute;
+        right: clamp(1.5rem, 3.5vw, 3rem);
+        bottom: clamp(1.25rem, 2.5vw, 2rem);
+        display: flex;
+        align-items: flex-end;
+        gap: 0.35rem;
+        pointer-events: none;
+    }
+
+    .asterisco {
+        display: block;
+    }
+
+    .asterisco-azul {
+        width: 42px;
+        height: 42px;
+        color: #cbe5f4;
+        margin-bottom: 0.35rem;
+    }
+
+    .asterisco-vino {
+        width: 38px;
+        height: 38px;
+        color: #6e0d0d;
+    }
+
     .modal {
-        position: fixed; inset: 0; background: rgba(15,23,42,0.5);
-        display: grid; place-items: center; padding: 1rem; z-index: 50;
+        position: fixed;
+        inset: 0;
+        z-index: 60;
+        display: grid;
+        place-items: center;
+        padding: 1rem;
+        background: rgba(46, 4, 4, 0.62);
+        backdrop-filter: blur(3px);
     }
-    .modal[hidden] { display: none; }
+
+    .modal[hidden] {
+        display: none;
+    }
+
     .modal-caja {
-        background: #fff; border-radius: 8px; padding: 1.5rem;
-        width: 100%; max-width: 440px; display: flex; flex-direction: column; gap: 1rem;
+        width: 100%;
+        max-width: 460px;
+        max-height: 92vh;
+        overflow-y: auto;
+        box-sizing: border-box;
+        padding: clamp(1.25rem, 3vw, 1.85rem);
+        border-radius: 24px;
+        background: #fbf9f0;
+        box-shadow: 0 30px 60px rgba(0, 0, 0, 0.35);
     }
-    .modal-caja h2 { margin: 0; color: #0f172a; }
-    .modal-caja form { display: flex; flex-direction: column; gap: 0.8rem; }
-    .modal-caja label { display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.9rem; font-weight: 600; color: #0f172a; }
-    .modal-caja input, .modal-caja select, .modal-caja textarea {
-        padding: 0.6rem 0.7rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 1rem;
+
+    .modal-caja h2 {
+        margin: 0 0 1.15rem;
+        font-size: 1.35rem;
+        font-weight: 800;
+        color: #3b2118;
     }
-    .modal-acciones { display: flex; justify-content: flex-end; gap: 0.6rem; }
-    .btn-ghost {
-        border: 1px solid #cbd5e1; background: #fff; border-radius: 6px;
-        padding: 0.6rem 1.2rem; cursor: pointer; font-weight: 600; color: #0f172a;
+
+    .modal-caja form {
+        display: flex;
+        flex-direction: column;
+        gap: 0.8rem;
     }
-    @media (max-width: 960px) {
-        .cal { padding: 1rem; }
-        .cal-top { flex-direction: column; align-items: flex-start; }
-        .abajo { grid-template-columns: 1fr; }
-        .dia { min-height: 84px; }
-        .semana span { font-size: 0.75rem; }
-        .mini { font-size: 0.7rem; }
+
+    .renglon {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.8rem;
+    }
+
+    .campo {
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+        min-width: 0;
+        font-size: 0.68rem;
+        font-weight: 700;
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+        color: #7d6553;
+    }
+
+    .campo input,
+    .campo select,
+    .campo textarea {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 0.58rem 0.7rem;
+        border: 1px solid #e2d3bb;
+        border-radius: 10px;
+        background: #fffdf7;
+        color: #3b2118;
+        font-size: 0.9rem;
+        font-weight: 500;
+        letter-spacing: normal;
+        text-transform: none;
+        color-scheme: light;
+    }
+
+    .campo textarea {
+        resize: vertical;
+        min-height: 74px;
+    }
+
+    .campo input:focus,
+    .campo select:focus,
+    .campo textarea:focus {
+        outline: 2px solid rgba(110, 13, 13, 0.55);
+        outline-offset: 1px;
+        border-color: transparent;
+    }
+
+    .selector-cal {
+        display: flex;
+        align-items: center;
+        gap: 0.45rem;
+    }
+
+    .punto-cal {
+        flex: 0 0 auto;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: var(--c, #6e0d0d);
+        box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.14);
+    }
+
+    .selector-cal select {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .modal-acciones {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.6rem;
+        margin-top: 0.6rem;
+    }
+
+    .btn-primario,
+    .btn-secundario {
+        border-radius: 999px;
+        padding: 0.58rem 1.4rem;
+        font-size: 0.88rem;
+        cursor: pointer;
+    }
+
+    .btn-primario {
+        border: 0;
+        background: #6e0d0d;
+        color: #fff8ee;
+        font-weight: 700;
+    }
+
+    .btn-primario:hover {
+        background: #581010;
+    }
+
+    .btn-secundario {
+        border: 1px solid #d8c7ad;
+        background: transparent;
+        color: #6b4f3f;
+        font-weight: 600;
+    }
+
+    .btn-secundario:hover {
+        background: #f4ecdd;
+    }
+
+    .btn-primario:focus-visible,
+    .btn-secundario:focus-visible {
+        outline: 2px solid #6e0d0d;
+        outline-offset: 2px;
+    }
+
+    @media (max-width: 980px) {
+        .tablero {
+            grid-template-columns: minmax(0, 1fr);
+            grid-template-rows: auto auto auto;
+            row-gap: 2rem;
+            padding: 1.75rem 1.5rem 2rem;
+            min-height: calc(100vh - 36px);
+            align-content: start;
+        }
+
+        .zona-cal {
+            grid-column: 1;
+            grid-row: 1;
+        }
+
+        .lateral {
+            grid-column: 1;
+            grid-row: 2;
+            padding-top: 0;
+        }
+
+        .lateral h2 {
+            text-align: left;
+        }
+
+        .ayuda {
+            text-align: left;
+            margin-bottom: 1.25rem;
+        }
+
+        .calendarios {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.9rem 1.25rem;
+        }
+
+        .btn-nueva {
+            width: 100%;
+            margin-top: 1.5rem;
+        }
+
+        .btn-regresar {
+            grid-column: 1;
+            grid-row: 3;
+        }
+
+        .adornos {
+            display: none;
+        }
+    }
+
+    @media (max-width: 560px) {
+        .cal {
+            padding: 10px;
+        }
+
+        .tablero {
+            border-radius: 24px;
+            padding: 1.25rem 1rem 1.5rem;
+            min-height: calc(100vh - 20px);
+        }
+
+        .cal-cabecera {
+            align-items: flex-start;
+            flex-wrap: wrap;
+        }
+
+        .calendario {
+            padding: 0.6rem 0.5rem 0.7rem;
+        }
+
+        .semana {
+            font-size: 0.56rem;
+            letter-spacing: 0.02em;
+        }
+
+        .vacio,
+        .dia {
+            min-height: 48px;
+        }
+
+        .dia {
+            padding: 0.3rem;
+        }
+
+        .num {
+            min-width: 19px;
+            height: 19px;
+            font-size: 0.68rem;
+        }
+
+        .punto {
+            width: 6px;
+            height: 6px;
+        }
+
+        .detalle-cab {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.15rem;
+        }
+
+        .dia-fecha {
+            text-align: left;
+        }
+
+        .lista {
+            max-height: none;
+        }
+
+        .renglon {
+            grid-template-columns: 1fr;
+        }
+
+        .btn-regresar {
+            font-size: 1.15rem;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .dia,
+        .marca,
+        .nombre,
+        .btn-nueva,
+        .btn-regresar,
+        .btn-nav,
+        .btn-hoy {
+            transition: none;
+        }
     }
 </style>
